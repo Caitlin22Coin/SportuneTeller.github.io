@@ -1,0 +1,76 @@
+<script>
+  const fortunes = [
+    // ... (keep all your existing fortunes array exactly as-is)
+  ];
+
+  const pullBtn = document.getElementById('pullBtn');
+  const cardBack = document.getElementById('card-back');
+  const cardFront = document.getElementById('card-front');
+  const titleEl = document.getElementById('title');
+  const playerEl = document.getElementById('player');
+  const predEl = document.getElementById('prediction');
+  const dateEl = document.getElementById('date');
+  const badgeEl = document.getElementById('rarity-badge');
+
+  pullBtn.addEventListener('click', () => {
+    // For testing: cooldown = 1 minute (60 seconds)
+    const now = new Date();
+    const currentMinuteKey = now.toISOString().slice(0, 16); // YYYY-MM-DDTHH:MM
+
+    const lastPull = localStorage.getItem('lastPull');
+    if (lastPull === currentMinuteKey) {
+      alert("Spirits say: one fate per minute for now (testing mode). Wait 60 seconds and try again.");
+      return;
+    }
+    localStorage.setItem('lastPull', currentMinuteKey);
+
+    const fortune = fortunes[Math.floor(Math.random() * fortunes.length)];
+    titleEl.textContent = fortune.match;
+    playerEl.textContent = `Starring ${fortune.player}`;
+    predEl.textContent = `"${fortune.pred}"`;
+    dateEl.textContent = now.toLocaleString(); // nicer display with time
+    badgeEl.textContent = fortune.rarity.toUpperCase();
+    badgeEl.className = `px-4 py-2 rounded-full bg-black/60 border text-xs md:text-sm font-bebas tracking-widest ${fortune.rarity === 'mythic' ? 'text-neon-red animate-pulse' : fortune.rarity === 'rare' ? 'text-neon-magenta' : fortune.rarity === 'uncommon' ? 'text-neon-cyan' : 'text-neon-blue'}`;
+
+    // Apply rarity class
+    cardFront.className = 'absolute inset-0 bg-gradient-to-br from-black to-card-bg rounded-3xl border-4 border-transparent shadow-2xl p-6 md:p-10 flex flex-col justify-between transform rotate-y-180 backface-hidden opacity-100 transition-opacity duration-500';
+    cardFront.classList.add(`rarity-${fortune.rarity}`);
+
+    // Flip animation
+    cardBack.style.transform = 'perspective(1000px) rotateY(-180deg) scale(0.98)';
+    cardFront.style.transform = 'perspective(1000px) rotateY(0deg) scale(1.02)';
+    cardFront.classList.remove('opacity-0');
+
+    pullBtn.textContent = "FATE SEALED";
+    pullBtn.disabled = true;
+    pullBtn.classList.remove('animate-pulse');
+
+    // Optional: auto-re-enable button after 60 seconds (for even faster testing)
+    setTimeout(() => {
+      pullBtn.textContent = "PULL MY DESTINY";
+      pullBtn.disabled = false;
+      pullBtn.classList.add('animate-pulse');
+    }, 60000); // 60 seconds
+  });
+
+  // On page load: check if we can pull right away (for testing)
+  const nowOnLoad = new Date();
+  const currentMinuteOnLoad = nowOnLoad.toISOString().slice(0, 16);
+  if (localStorage.getItem('lastPull') !== currentMinuteOnLoad) {
+    pullBtn.textContent = "PULL MY DESTINY";
+    pullBtn.disabled = false;
+    pullBtn.classList.add('animate-pulse');
+  } else {
+    pullBtn.textContent = "WAIT 60s...";
+    pullBtn.disabled = true;
+    // Auto-re-enable after remaining time (optional polish)
+    const remaining = 60000 - (nowOnLoad - new Date(localStorage.getItem('lastPull') + ':00Z'));
+    if (remaining > 0) {
+      setTimeout(() => {
+        pullBtn.textContent = "PULL MY DESTINY";
+        pullBtn.disabled = false;
+        pullBtn.classList.add('animate-pulse');
+      }, remaining);
+    }
+  }
+</script>
