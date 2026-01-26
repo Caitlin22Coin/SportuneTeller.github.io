@@ -1,3 +1,126 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SportUnteller • Sports Fortune Awaits</title>
+  <meta name="description" content="Cyberpunk tarot for ballers. Pull your daily NBA destiny — matchups, players, chaos."/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            'neon-blue': '#00f0ff',
+            'neon-cyan': '#00ffff',
+            'neon-purple': '#c300ff',
+            'neon-magenta': '#ff00ff',
+            'neon-red': '#ff0044',
+            'dark-bg': '#0a0015',
+            'card-bg': '#14003a',
+            'rarity-common': '#00f0ff',
+            'rarity-uncommon': '#00ffff',
+            'rarity-rare': '#ff00ff',
+            'rarity-mythic': '#ff0044',
+          },
+          fontFamily: {
+            'bebas': ['Bebas Neue', 'sans-serif'],
+            'orbitron': ['Orbitron', 'sans-serif'],
+          },
+          animation: {
+            'glow': 'glow 2s ease-in-out infinite alternate',
+            'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'glitch': 'glitch 3s infinite',
+          },
+          keyframes: {
+            glow: {
+              'from': { textShadow: '0 0 10px currentColor, 0 0 20px currentColor' },
+              'to': { textShadow: '0 0 20px currentColor, 0 0 40px currentColor' },
+            },
+            pulse: {
+              '0%, 100%': { opacity: '1' },
+              '50%': { opacity: '0.7' },
+            },
+            glitch: {
+              '0%': { transform: 'translate(0)' },
+              '20%': { transform: 'translate(-3px, 3px)' },
+              '40%': { transform: 'translate(3px, -3px)' },
+              '60%': { transform: 'translate(-2px, 2px)' },
+              '80%': { transform: 'translate(2px, -2px)' },
+              '100%': { transform: 'translate(0)' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    .perspective-1000 { perspective: 1000px; }
+    .backface-hidden { backface-visibility: hidden; }
+    .rotate-y-180 { transform: rotateY(180deg); }
+    .rarity-common   { border-color: theme('colors.rarity-common');   box-shadow: 0 0 25px theme('colors.rarity-common'); }
+    .rarity-uncommon { border-color: theme('colors.rarity-uncommon'); box-shadow: 0 0 35px theme('colors.rarity-uncommon'), 0 0 50px #c300ff40; animation: pulse-slow 5s infinite; }
+    .rarity-rare     { border-color: theme('colors.rarity-rare');     box-shadow: 0 0 45px theme('colors.rarity-rare'), 0 0 70px #ff004460; filter: brightness(1.15); animation: glitch 4s infinite; }
+    .rarity-mythic   { border-image: linear-gradient(90deg, #00ffff, #ff00ff, #ff0044) 1; box-shadow: 0 0 60px #00ffff, 0 0 90px #ff00ff, 0 0 120px #ff0044; animation: glow-mythic 1.8s infinite alternate, glitch 2.5s infinite; }
+    @keyframes glow-mythic { from { text-shadow: 0 0 15px white, 0 0 30px #00ffff; } to { text-shadow: 0 0 30px #ff00ff, 0 0 50px #ff0044; } }
+  </style>
+</head>
+<body class="bg-dark-bg text-white min-h-screen font-orbitron flex flex-col items-center justify-center p-4 md:p-8 overflow-hidden">
+
+  <!-- Background subtle effect -->
+  <div class="fixed inset-0 pointer-events-none opacity-20">
+    <div class="absolute inset-0 bg-gradient-to-br from-neon-purple/10 via-neon-blue/10 to-neon-red/10 animate-pulse-slow"></div>
+  </div>
+
+  <!-- Header -->
+  <header class="text-center mb-10 md:mb-16 z-10">
+    <h1 class="text-7xl md:text-9xl font-bebas tracking-widest text-neon-magenta animate-glow drop-shadow-2xl">
+      SPORTUNTELLER
+    </h1>
+    <p class="mt-4 text-2xl md:text-3xl text-neon-cyan opacity-90">
+      Cyber-tarot for the court. Pull your fate.
+    </p>
+  </header>
+
+  <!-- Card Area -->
+  <div class="relative w-full max-w-3xl z-10">
+    <div id="card" class="relative h-[500px] md:h-[620px] perspective-1000 transition-all duration-700">
+      <!-- Back (mysterious side) -->
+      <div id="card-back" class="absolute inset-0 bg-gradient-to-br from-card-bg to-black rounded-3xl border-4 border-neon-purple/40 shadow-2xl flex items-center justify-center transform rotate-y-0 backface-hidden">
+        <div class="text-center">
+          <div class="text-9xl md:text-[12rem] opacity-30 animate-pulse">?</div>
+          <p class="mt-6 text-4xl md:text-6xl font-bebas tracking-widest text-neon-blue animate-glow">REVEAL FATE</p>
+          <p class="mt-4 text-lg opacity-70">One prophecy per day...</p>
+        </div>
+      </div>
+
+      <!-- Front (fortune side) -->
+      <div id="card-front" class="absolute inset-0 bg-gradient-to-br from-black to-card-bg rounded-3xl border-4 border-transparent shadow-2xl p-6 md:p-10 flex flex-col justify-between transform rotate-y-180 backface-hidden opacity-0 transition-opacity duration-500">
+        <div class="text-center">
+          <h2 id="title" class="text-5xl md:text-7xl font-bebas tracking-tight text-neon-red animate-glow">??? vs ???</h2>
+          <p id="player" class="mt-4 text-3xl md:text-4xl text-neon-cyan">Starring [Player]</p>
+        </div>
+        <div class="text-center text-2xl md:text-3xl font-medium leading-relaxed italic">
+          <p id="prediction">"The spirits demand chaos on the hardwood..."</p>
+        </div>
+        <div class="flex justify-between items-end text-sm md:text-base opacity-80">
+          <p>— SportUnteller • <span id="date"></span></p>
+          <div id="rarity-badge" class="px-4 py-2 rounded-full bg-black/60 border text-xs md:text-sm font-bebas tracking-widest"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Button -->
+    <div class="mt-10 text-center">
+      <button id="pullBtn" class="px-16 py-8 bg-gradient-to-r from-neon-purple to-neon-red hover:from-neon-red hover:to-neon-magenta text-white text-4xl font-bebas tracking-widest rounded-full shadow-2xl transform hover:scale-105 transition-all duration-300 animate-pulse">
+        PULL MY DESTINY
+      </button>
+      <p class="mt-6 text-lg opacity-70">Share the prophecy with the group chat.</p>
+    </div>
+  </div>
+
 <script>
   const fortunes = [
     // ... (keep all your existing fortunes array exactly as-is)
@@ -74,3 +197,5 @@
     }
   }
 </script>
+</body>
+</html>
