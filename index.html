@@ -3,189 +3,448 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SportUnteller</title>
-  <meta name="description" content="Daily sports tarot pull from full 78-card deck. One fate per day.">
+  <title>SPORTUNETELLER – Sports Fortune Teller</title>
+  <meta name="description" content="Daily sports tarot prophecy. Unlimited pulls in beta.">
   <style>
     body {
       margin: 0;
-      padding: 1rem;
+      padding: 20px;
       font-family: 'Courier New', Courier, monospace;
       background: white;
       color: black;
-      line-height: 1.4;
+      text-align: center;
       max-width: 800px;
       margin: 0 auto;
     }
     h1 {
-      font-size: 2.5rem;
-      text-align: center;
-      margin: 1.5rem 0 0.5rem;
+      font-size: 3rem;
+      margin: 20px 0 10px;
       border-bottom: 2px solid black;
-      padding-bottom: 0.5rem;
+      padding-bottom: 10px;
     }
-    p.tagline {
-      text-align: center;
-      font-size: 1.1rem;
-      margin: 0 0 2rem;
+    .tagline {
+      font-size: 1.3rem;
+      margin-bottom: 30px;
     }
     #card {
-      border: 2px solid black;
-      padding: 1.5rem;
-      margin: 0 auto 2rem;
-      min-height: 300px;
+      border: 3px solid black;
+      padding: 30px;
+      min-height: 350px;
+      margin: 30px auto;
       background: #fff;
       position: relative;
+      font-size: 1.1rem;
     }
-    #card-back, #card-front {
+    #back, #front {
       position: absolute;
       inset: 0;
-      padding: 1.5rem;
+      padding: 30px;
       display: flex;
       flex-direction: column;
       justify-content: center;
-      text-align: center;
     }
-    #card-front {
+    #front {
       opacity: 0;
-      transition: opacity 0.8s ease;
+      transition: opacity 1s;
     }
-    #card.revealed #card-back { opacity: 0; }
-    #card.revealed #card-front { opacity: 1; }
-    #title { font-size: 1.8rem; font-weight: bold; margin-bottom: 1rem; }
-    #player { font-size: 1.4rem; margin-bottom: 1rem; }
-    #prediction { font-size: 1.2rem; font-style: italic; }
-    #date { font-size: 0.9rem; margin-top: 1rem; }
+    #card.revealed #back { opacity: 0; }
+    #card.revealed #front { opacity: 1; }
+    #title { font-size: 2rem; font-weight: bold; margin-bottom: 15px; }
+    #player { font-size: 1.5rem; margin-bottom: 15px; }
+    #prediction { font-style: italic; margin: 20px 0; }
+    #extra { margin: 20px 0; line-height: 1.6; }
+    #date { font-size: 1rem; margin-top: 30px; text-align: right; }
     button {
-      display: block;
-      width: 100%;
-      max-width: 400px;
-      margin: 0 auto 1rem;
-      padding: 1.2rem;
       font-family: inherit;
-      font-size: 1.5rem;
+      font-size: 1.6rem;
       font-weight: bold;
+      padding: 15px 40px;
       background: black;
       color: white;
       border: none;
       cursor: pointer;
+      margin: 30px auto;
+      display: block;
     }
-    button:disabled {
-      background: #555;
-      cursor: not-allowed;
-    }
-    button:hover:not(:disabled) {
-      background: #333;
-    }
-    .instructions {
-      text-align: center;
-      font-size: 0.9rem;
-      margin-top: 2rem;
+    button:hover { background: #333; }
+    .beta-note {
+      font-size: 1rem;
       color: #444;
+      margin-top: 40px;
     }
     @media (max-width: 600px) {
-      h1 { font-size: 2rem; }
-      button { font-size: 1.3rem; padding: 1rem; }
-      #card { padding: 1rem; min-height: 250px; }
-      #title { font-size: 1.5rem; }
+      h1 { font-size: 2.2rem; }
+      button { font-size: 1.4rem; padding: 12px 30px; }
+      #card { padding: 20px; min-height: 300px; }
+      #title { font-size: 1.6rem; }
     }
   </style>
 </head>
 <body>
-  <h1>SPORTUNTELLER</h1>
-  <p class="tagline">Daily fate from the full 78-card tarot deck. One pull per day.</p>
+  <h1>SPORTUNETELLER</h1>
+  <p class="tagline">Sports Fortune Teller – Tarot for Today's Games</p>
 
   <div id="card">
-    <div id="card-back">
-      <p style="font-size: 4rem; margin: 0;">?</p>
-      <p style="font-size: 1.6rem; margin-top: 1rem;">Reveal Today's Prophecy</p>
+    <div id="back">
+      <p style="font-size: 6rem; margin: 0;">?</p>
+      <p style="font-size: 2rem; margin-top: 20px;">Reveal Prophecy</p>
     </div>
-    <div id="card-front">
+    <div id="front">
       <div id="title"></div>
       <div id="player"></div>
       <div id="prediction"></div>
+      <div id="extra"></div>
       <div id="date"></div>
     </div>
   </div>
 
-  <button id="pullBtn">PULL FATE</button>
-  <p class="instructions">One revelation per day. Share if it resonates.</p>
+  <button id="btn">PULL FATE</button>
+  <p class="beta-note">Beta mode: Click as many times as you like. Share your pull!</p>
 
   <script>
+    // Paste your fortunes array here ↓↓↓
     const fortunes = [
-      // Major Arcana (22) - assigned to top stars
-      { match: "Thunder vs Pelicans", player: "Shai Gilgeous-Alexander", tarot: "The Magician", why: "masters skill and manifestation", pred: "Willpower creates victory; unstoppable flow tonight." },
-      { match: "Nuggets vs Clippers", player: "Nikola Jokić", tarot: "The High Priestess", why: "intuition guides hidden depths", pred: "Mystery unfolds; inner wisdom dominates." },
-      { match: "Mavericks vs Suns", player: "Luka Dončić", tarot: "The Empress", why: "nurtures creative abundance", pred: "Growth flourishes; creativity overwhelms." },
-      { match: "Celtics vs Lakers", player: "Jayson Tatum", tarot: "The Emperor", why: "commands structure and authority", pred: "Order prevails; control secures win." },
-      { match: "Spurs vs Any", player: "Victor Wembanyama", tarot: "The Hierophant", why: "teaches tradition and wisdom", pred: "Guidance elevates; lessons lead to triumph." },
-      { match: "Warriors vs Timberwolves", player: "Stephen Curry", tarot: "The Lovers", why: "harmonizes choices and bonds", pred: "Union aligns; balanced fate succeeds." },
-      { match: "Bucks vs Knicks", player: "Giannis Antetokounmpo", tarot: "The Chariot", why: "drives victory through will", pred: "Determination charges forward; conquest assured." },
-      { match: "76ers vs Heat", player: "Joel Embiid", tarot: "Strength", why: "tames power with courage", pred: "Inner force overcomes; gentle strength wins." },
-      { match: "Cavaliers vs Magic", player: "Donovan Mitchell", tarot: "The Hermit", why: "seeks inner light", pred: "Solitude reveals; truth guides to success." },
-      { match: "Timberwolves vs Warriors", player: "Anthony Edwards", tarot: "Wheel of Fortune", why: "cycles turn in favor", pred: "Luck spins upward; destiny shifts positively." },
-      { match: "Suns vs Mavericks", player: "Devin Booker", tarot: "Justice", why: "balances truth and fairness", pred: "Equilibrium restores; right prevails." },
-      { match: "Pacers vs Any", player: "Tyrese Haliburton", tarot: "The Hanged Man", why: "surrenders for new view", pred: "Perspective shifts; sacrifice yields gain." },
-      { match: "Lakers vs Any", player: "LeBron James", tarot: "Death", why: "transforms through endings", pred: "Rebirth ignites; old dies, new rises." },
-      { match: "Celtics vs Any", player: "Jaylen Brown", tarot: "Temperance", why: "blends opposites in harmony", pred: "Balance flows; moderation achieves." },
-      { match: "Knicks vs Bucks", player: "Jalen Brunson", tarot: "The Devil", why: "breaks chains of limitation", pred: "Freedom from bonds; passion liberates." },
-      { match: "Rockets vs Grizzlies", player: "Jalen Green", tarot: "The Tower", why: "shatters illusions suddenly", pred: "Upheaval awakens; revelation sparks change." },
-      { match: "Magic vs Cavaliers", player: "Paolo Banchero", tarot: "The Star", why: "inspires hope and renewal", pred: "Light guides; healing elevates." },
-      { match: "Kings vs Pelicans", player: "De'Aaron Fox", tarot: "The Moon", why: "navigates illusion and fear", pred: "Clarity emerges; intuition triumphs." },
-      { match: "Hawks vs Pistons", player: "Trae Young", tarot: "The Sun", why: "radiates joy and success", pred: "Vitality shines; pure win illuminates." },
-      { match: "Jazz vs Wizards", player: "Lauri Markkanen", tarot: "Judgement", why: "awakens to higher call", pred: "Rebirth summons; rise renewed." },
-      { match: "Hornets vs Bulls", player: "LaMelo Ball", tarot: "The World", why: "completes cycle of wholeness", pred: "Fulfillment arrives; journey ends victorious." },
-      { match: "Raptors vs Blazers", player: "Scottie Barnes", tarot: "The Fool", why: "leaps fearlessly into new", pred: "Adventure begins; innocence triumphs." },
-
-      // Minor Arcana (56) - cycled to cover all suits/cards, repeated/varied to reach 256 total
-      // Wands (Ace-10, Page, Knight, Queen, King) x cycle
-      { match: "Thunder vs Any", player: "Chet Holmgren", tarot: "Ace of Wands", why: "ignites new passion", pred: "Spark begins; energy surges forward." },
-      { match: "Nuggets vs Any", player: "Jamal Murray", tarot: "Two of Wands", why: "plans bold expansion", pred: "Vision expands; choices lead to growth." },
-      { match: "Celtics vs Any", player: "Derrick White", tarot: "Three of Wands", why: "awaits distant success", pred: "Opportunity arrives; progress unfolds." },
-      // ... (continuing pattern for brevity; in full code, expand similarly for all Minor cards)
-      // Example continuation for remaining:
-      { match: "Suns vs Any", player: "Bradley Beal", tarot: "Four of Wands", why: "celebrates stable home", pred: "Harmony builds; foundation strengthens." },
-      { match: "76ers vs Any", player: "Tyrese Maxey", tarot: "Five of Wands", why: "competes in healthy rivalry", pred: "Struggle refines; competition sharpens." },
-      // Swords suit examples
-      { match: "Warriors vs Any", player: "Andrew Wiggins", tarot: "Ace of Swords", why: "cuts through clarity", pred: "Truth pierces; breakthrough achieved." },
-      // Cups, Pentacles similarly cycled...
-      // In practice, the array below is truncated for response length — paste the pattern to fill 256:
-      // Total: 22 Major + 234 Minor variations = 256
-      // For your file: duplicate the Minor pattern (rotate suits/cards/players) until array.length = 256
+      // Example entry – replace this whole array with your 22+ Major Arcana JSON
+      {
+        match: "Orlando Magic at Cleveland Cavaliers",
+        player: "Donovan Mitchell",
+        tarot: "The Chariot",
+        why: "averaging 26+ PPG in January with 35+ minutes nightly",
+        pred: "Directed will propels steady advance through the contest.",
+        omen: "Strong",
+        window: "Entire game",
+        fork: { upright: "Focused momentum sustains control", reversed: "Scattered distractions disrupt rhythm" },
+        lesson: "Opposing forces must be aligned to achieve lasting progress"
+      }
+     [
+  {
+    "match": "Orlando Magic at Cleveland Cavaliers",
+    "player": "Donovan Mitchell",
+    "tarot": "The Chariot",
+    "why": "averaging 26+ PPG in January with 35+ minutes nightly",
+    "pred": "Directed will propels steady advance through the contest.",
+    "omen": "Strong",
+    "window": "Entire game",
+    "fork": {
+      "upright": "Focused momentum sustains control and forward movement",
+      "reversed": "Scattered distractions disrupt rhythm and direction"
+    },
+    "lesson": "Opposing forces must be aligned to achieve lasting progress"
+  },
+  {
+    "match": "Portland Trail Blazers at Boston Celtics",
+    "player": "Jayson Tatum",
+    "tarot": "Strength",
+    "why": "consistent 30+ point games in January facing tough defenses",
+    "pred": "Inner resolve quietly overcomes external resistance.",
+    "omen": "Strong",
+    "window": "Third quarter",
+    "fork": {
+      "upright": "Patient power tames challenges without force",
+      "reversed": "Suppressed tension erupts into uncontrolled struggle"
+    },
+    "lesson": "Endurance arises from gentleness rather than domination"
+  },
+  {
+    "match": "Golden State Warriors at Minnesota Timberwolves",
+    "player": "Anthony Edwards",
+    "tarot": "The Fool",
+    "why": "high-volume scoring on heavy minutes in recent road games",
+    "pred": "Unburdened steps venture into unknown territory.",
+    "omen": "Chaotic",
+    "window": "Fourth quarter",
+    "fork": {
+      "upright": "Open-hearted daring opens unexpected pathways",
+      "reversed": "Recklessness leads to falls and missed opportunities"
+    },
+    "lesson": "Beginnings require trust in the unknown without attachment"
+  },
+  {
+    "match": "Orlando Magic at Cleveland Cavaliers",
+    "player": "Paolo Banchero",
+    "tarot": "The Magician",
+    "why": "increased playmaking role with 8+ assists in January matchups",
+    "pred": "Skill channels intention into tangible creation.",
+    "omen": "Fated",
+    "window": "Second quarter",
+    "fork": {
+      "upright": "Mastery aligns tools to manifest clear outcomes",
+      "reversed": "Misaligned energy scatters potential and effort"
+    },
+    "lesson": "Will transforms raw elements when directed with awareness"
+  },
+  {
+    "match": "Portland Trail Blazers at Boston Celtics",
+    "player": "Jaylen Brown",
+    "tarot": "The Emperor",
+    "why": "defensive assignment on high-usage wings plus 25+ PPG",
+    "pred": "Structure maintains order amid shifting circumstances.",
+    "omen": "Strong",
+    "window": "Entire game",
+    "fork": {
+      "upright": "Authority establishes boundaries that endure",
+      "reversed": "Rigid control collapses under pressure"
+    },
+    "lesson": "Stability emerges from consistent principle, not force"
+  },
+  {
+    "match": "Golden State Warriors at Minnesota Timberwolves",
+    "player": "Stephen Curry",
+    "tarot": "The High Priestess",
+    "why": "off-ball movement exploiting mismatches in recent games",
+    "pred": "Subtle knowing reveals what is hidden in plain sight.",
+    "omen": "Fated",
+    "window": "Opening quarter",
+    "fork": {
+      "upright": "Intuition accesses deeper currents and timing",
+      "reversed": "Surface distractions obscure inner guidance"
+    },
+    "lesson": "Silence and receptivity unveil truths beyond the obvious"
+  },
+  {
+    "match": "Orlando Magic at Cleveland Cavaliers",
+    "player": "Evan Mobley",
+    "tarot": "The Hermit",
+    "why": "increased defensive minutes anchoring paint protection",
+    "pred": "Solitary focus illuminates the path through darkness.",
+    "omen": "Unstable",
+    "window": "Third quarter",
+    "fork": {
+      "upright": "Withdrawal yields clarity and steady light",
+      "reversed": "Isolation becomes disconnection and loss"
+    },
+    "lesson": "Seeking within restores vision when outer noise overwhelms"
+  },
+  {
+    "match": "Portland Trail Blazers at Boston Celtics",
+    "player": "Derrick White",
+    "tarot": "The Lovers",
+    "why": "defensive switch on perimeter threats with high minutes",
+    "pred": "Harmonious choices align opposing elements.",
+    "omen": "Strong",
+    "window": "Second quarter",
+    "fork": {
+      "upright": "Union of opposites creates balanced flow",
+      "reversed": "Division fragments effort and creates conflict"
+    },
+    "lesson": "Integration of dualities brings wholeness and clarity"
+  },
+  {
+    "match": "Golden State Warriors at Minnesota Timberwolves",
+    "player": "Rudy Gobert",
+    "tarot": "The Hierophant",
+    "why": "rim protection role with consistent blocks in January",
+    "pred": "Tradition anchors the structure of the unfolding.",
+    "omen": "Fated",
+    "window": "Entire game",
+    "fork": {
+      "upright": "Established wisdom provides enduring foundation",
+      "reversed": "Blind adherence stifles adaptation"
+    },
+    "lesson": "Transmission of knowledge preserves continuity across change"
+  },
+  {
+    "match": "Orlando Magic at Cleveland Cavaliers",
+    "player": "Franz Wagner",
+    "tarot": "The Wheel of Fortune",
+    "why": "streak of double-doubles in recent high-minute games",
+    "pred": "Cycles turn, bringing what was due in time.",
+    "omen": "Chaotic",
+    "window": "Fourth quarter",
+    "fork": {
+      "upright": "Favorable shift elevates position naturally",
+      "reversed": "Unexpected downturn tests resilience"
+    },
+    "lesson": "Impermanence teaches acceptance of rise and fall"
+  },
+  {
+    "match": "Portland Trail Blazers at Boston Celtics",
+    "player": "Kristaps Porziņģis",
+    "tarot": "Justice",
+    "why": "return from injury with measured minutes and impact",
+    "pred": "Equilibrium restores what was out of alignment.",
+    "omen": "Unstable",
+    "window": "Opening quarter",
+    "fork": {
+      "upright": "Fair measure returns balance and consequence",
+      "reversed": "Imbalance perpetuates distortion"
+    },
+    "lesson": "Truth applied without favor creates harmony"
+  },
+  {
+    "match": "Golden State Warriors at Minnesota Timberwolves",
+    "player": "Karl-Anthony Towns",
+    "tarot": "The Hanged Man",
+    "why": "shifted role with increased rebounding in January",
+    "pred": "Voluntary pause reveals inverted perspective.",
+    "omen": "Chaotic",
+    "window": "Third quarter",
+    "fork": {
+      "upright": "Surrender opens new understanding",
+      "reversed": "Resistance prolongs stagnation"
+    },
+    "lesson": "Letting go of old views allows fresh insight"
+  },
+  {
+    "match": "Orlando Magic at Cleveland Cavaliers",
+    "player": "Jarrett Allen",
+    "tarot": "Death",
+    "why": "rebound surge in recent matchups against smaller fronts",
+    "pred": "Necessary endings clear space for renewal.",
+    "omen": "Fated",
+    "window": "Entire game",
+    "fork": {
+      "upright": "Release transforms what no longer serves",
+      "reversed": "Clinging delays inevitable change"
+    },
+    "lesson": "Death of the old is the gateway to new life"
+  },
+  {
+    "match": "Portland Trail Blazers at Boston Celtics",
+    "player": "Al Horford",
+    "tarot": "Temperance",
+    "why": "veteran minutes management blending offense and defense",
+    "pred": "Moderation blends elements into steady flow.",
+    "omen": "Strong",
+    "window": "Second quarter",
+    "fork": {
+      "upright": "Integration creates harmony and patience",
+      "reversed": "Extremes create imbalance and tension"
+    },
+    "lesson": "Balance between opposites fosters enduring equilibrium"
+  },
+  {
+    "match": "Golden State Warriors at Minnesota Timberwolves",
+    "player": "Julius Randle",
+    "tarot": "The Devil",
+    "why": "high usage in isolation plays against perimeter defense",
+    "pred": "Chains of habit reveal themselves in pressure.",
+    "omen": "Chaotic",
+    "window": "Fourth quarter",
+    "fork": {
+      "upright": "Awareness breaks limiting bonds",
+      "reversed": "Unconscious patterns tighten control"
+    },
+    "lesson": "Recognition of attachments frees authentic movement"
+  },
+  {
+    "match": "Orlando Magic at Cleveland Cavaliers",
+    "player": "Jalen Suggs",
+    "tarot": "The Tower",
+    "why": "increased defensive steals disrupting primary ball-handlers",
+    "pred": "Sudden disruption clears false structures.",
+    "omen": "Chaotic",
+    "window": "Opening quarter",
+    "fork": {
+      "upright": "Breakdown awakens necessary truth",
+      "reversed": "Collapse without foundation leads to ruin"
+    },
+    "lesson": "False foundations must fall to allow true rebuilding"
+  },
+  {
+    "match": "Portland Trail Blazers at Boston Celtics",
+    "player": "Anfernee Simons",
+    "tarot": "The Star",
+    "why": "shooting streak from deep in January road games",
+    "pred": "Quiet hope restores after difficulty.",
+    "omen": "Fated",
+    "window": "Third quarter",
+    "fork": {
+      "upright": "Gentle light guides healing and inspiration",
+      "reversed": "Doubt obscures the path forward"
+    },
+    "lesson": "Faith in renewal sustains through dark periods"
+  },
+  {
+    "match": "Golden State Warriors at Minnesota Timberwolves",
+    "player": "Mike Conley",
+    "tarot": "The Moon",
+    "why": "veteran minutes navigating pick-and-roll confusion",
+    "pred": "Illusion and uncertainty test perception.",
+    "omen": "Unstable",
+    "window": "Second quarter",
+    "fork": {
+      "upright": "Intuition navigates hidden currents",
+      "reversed": "Fear distorts reality into deception"
+    },
+    "lesson": "Discernment separates truth from shadow"
+  },
+  {
+    "match": "Orlando Magic at Cleveland Cavaliers",
+    "player": "Darius Garland",
+    "tarot": "The Sun",
+    "why": "high assist totals in recent high-pace games",
+    "pred": "Clarity and vitality illuminate all involved.",
+    "omen": "Strong",
+    "window": "Entire game",
+    "fork": {
+      "upright": "Joy and success radiate outward",
+      "reversed": "Eclipsed light creates temporary dimming"
+    },
+    "lesson": "Authentic expression brings warmth to the whole"
+  },
+  {
+    "match": "Portland Trail Blazers at Boston Celtics",
+    "player": "Payton Pritchard",
+    "tarot": "Judgement",
+    "why": "bench spark with increased minutes off the bench",
+    "pred": "Call to renewal awakens what was dormant.",
+    "omen": "Fated",
+    "window": "Fourth quarter",
+    "fork": {
+      "upright": "Awakening brings clarity and release",
+      "reversed": "Resistance to the call prolongs stagnation"
+    },
+    "lesson": "Honest reckoning opens the door to rebirth"
+  },
+  {
+    "match": "Golden State Warriors at Minnesota Timberwolves",
+    "player": "Draymond Green",
+    "tarot": "The World",
+    "why": "defensive versatility anchoring multiple lineups",
+    "pred": "Completion integrates all parts into wholeness.",
+    "omen": "Strong",
+    "window": "Entire game",
+    "fork": {
+      "upright": "Cycle fulfills and brings unity",
+      "reversed": "Incomplete integration leaves loose ends"
+    },
+    "lesson": "Wholeness arrives when every element finds its place"
+  }
+]
     ];
 
-    // NOTE: To hit exactly 256, expand the array in your editor by copying the Minor Arcana pattern above ~4-5 times, changing tarot names (e.g., "Two of Cups", "Knight of Pentacles", "Queen of Swords", "King of Wands", etc.) and players/matchups. All 78 are covered in the first 78 entries + repeats.
-
-    const pullBtn = document.getElementById('pullBtn');
+    const btn = document.getElementById('btn');
     const card = document.getElementById('card');
-    const titleEl = document.getElementById('title');
-    const playerEl = document.getElementById('player');
-    const predEl = document.getElementById('prediction');
-    const dateEl = document.getElementById('date');
+    const title = document.getElementById('title');
+    const player = document.getElementById('player');
+    const prediction = document.getElementById('prediction');
+    const extra = document.getElementById('extra');
+    const date = document.getElementById('date');
 
-    pullBtn.addEventListener('click', () => {
-      const today = new Date().toDateString();
-      if (localStorage.getItem('lastPull') === today) {
-        alert("One fate per day. Return tomorrow.");
+    btn.addEventListener('click', () => {
+      if (fortunes.length === 0) {
+        alert("No fortunes loaded yet. Paste your array in the script!");
         return;
       }
-      localStorage.setItem('lastPull', today);
 
-      const fortune = fortunes[Math.floor(Math.random() * fortunes.length)];
-      titleEl.textContent = fortune.match;
-      playerEl.textContent = `${fortune.player} is ${fortune.tarot} because ${fortune.why}.`;
-      predEl.textContent = fortune.pred;
-      dateEl.textContent = new Date().toLocaleDateString();
+      const f = fortunes[Math.floor(Math.random() * fortunes.length)];
+
+      title.textContent = f.match;
+      player.textContent = `${f.player} is ${f.tarot} because ${f.why}.`;
+      prediction.textContent = f.pred;
+      extra.innerHTML = `
+        <strong>Omen:</strong> ${f.omen}<br>
+        <strong>Window:</strong> ${f.window}<br><br>
+        <strong>Upright:</strong> ${f.fork.upright}<br>
+        <strong>Reversed:</strong> ${f.fork.reversed}<br><br>
+        <strong>Lesson:</strong> ${f.lesson}
+      `;
+      date.textContent = new Date().toLocaleString();
 
       card.classList.add('revealed');
-      pullBtn.textContent = "FATE REVEALED";
-      pullBtn.disabled = true;
+      btn.textContent = "PULL AGAIN";
     });
-
-    if (localStorage.getItem('lastPull') !== new Date().toDateString()) {
-      pullBtn.disabled = false;
-      pullBtn.textContent = "PULL FATE";
-      card.classList.remove('revealed');
-    }
   </script>
 </body>
 </html>
