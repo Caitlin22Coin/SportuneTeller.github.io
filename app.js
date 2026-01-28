@@ -1,5 +1,4 @@
 const BASE = "assets/cards/";
-
 const FILES = [
   "chariot.png",
   "death.png",
@@ -23,99 +22,73 @@ const FILES = [
   "world.png",
 ];
 
-const prettyName = (file) =>
-  file.replace(".png","").replace(/[-_]/g," ").trim();
-
-const grid = document.getElementById("grid");
-
-const viewer = document.getElementById("viewer");
-const backdrop = document.getElementById("backdrop");
-const closeBtn = document.getElementById("closeBtn");
-const prevBtn = document.getElementById("prevBtn");
-const nextBtn = document.getElementById("nextBtn");
-const openBtn = document.getElementById("openBtn");
-const fullImg = document.getElementById("fullImg");
-const cardName = document.getElementById("cardName");
+const gallery = document.getElementById("gallery");
+const lightbox = document.getElementById("lightbox");
+const lightboxImg = document.getElementById("lightboxImg");
+const closeBtn = document.getElementById("close");
 
 let currentIndex = 0;
 
-function renderGrid(){
-  grid.innerHTML = "";
-  FILES.forEach((file, idx) => {
-    const tile = document.createElement("article");
-    tile.className = "tile";
-    tile.tabIndex = 0;
+function openAt(idx){
+  currentIndex = (idx + FILES.length) % FILES.length;
+  const src = BASE + FILES[currentIndex];
+  lightboxImg.src = src;
+  lightboxImg.alt = "";
+  lightbox.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden";
 
-    tile.innerHTML = `
-      <img class="thumb" loading="lazy" src="${BASE + file}" alt="${prettyName(file)}" />
-      <div class="caption">${prettyName(file)}</div>
-    `;
-
-    tile.addEventListener("click", () => openAt(idx));
-    tile.addEventListener("keydown", (e) => {
-      if(e.key === "Enter" || e.key === " ") openAt(idx);
-    });
-
-    grid.appendChild(tile);
-  });
-}
-
-function setUrl(idx){
+  // optional deep-link
   const url = new URL(window.location.href);
-  url.searchParams.set("card", String(idx));
+  url.searchParams.set("card", String(currentIndex));
   history.replaceState({}, "", url);
 }
 
-function clearUrl(){
+function close(){
+  lightbox.setAttribute("aria-hidden", "true");
+  document.body.style.overflow = "";
+
   const url = new URL(window.location.href);
   url.searchParams.delete("card");
   history.replaceState({}, "", url);
 }
 
-function openAt(idx){
-  currentIndex = (idx + FILES.length) % FILES.length;
-  const file = FILES[currentIndex];
-
-  viewer.setAttribute("aria-hidden", "false");
-  document.body.style.overflow = "hidden";
-
-  fullImg.src = BASE + file;
-  fullImg.alt = prettyName(file);
-  cardName.textContent = prettyName(file);
-
-  openBtn.href = BASE + file;
-
-  setUrl(currentIndex);
-}
-
-function closeViewer(){
-  viewer.setAttribute("aria-hidden", "true");
-  document.body.style.overflow = "";
-  clearUrl();
-}
-
 function prev(){ openAt(currentIndex - 1); }
 function next(){ openAt(currentIndex + 1); }
 
-backdrop.addEventListener("click", closeViewer);
-closeBtn.addEventListener("click", closeViewer);
-prevBtn.addEventListener("click", prev);
-nextBtn.addEventListener("click", next);
+function render(){
+  gallery.innerHTML = "";
+  FILES.forEach((file, idx) => {
+    const img = document.createElement("img");
+    img.loading = "lazy";
+    img.src = BASE + file;
+    img.alt = "";
+    img.addEventListener("click", () => openAt(idx));
+    gallery.appendChild(img);
+  });
+}
 
+closeBtn.addEventListener("click", close);
+
+// click outside image closes
+lightbox.addEventListener("click", (e) => {
+  if(e.target === lightbox) close();
+});
+
+// keyboard
 document.addEventListener("keydown", (e) => {
-  if(viewer.getAttribute("aria-hidden") === "true") return;
-  if(e.key === "Escape") closeViewer();
+  if(lightbox.getAttribute("aria-hidden") === "true") return;
+  if(e.key === "Escape") close();
   if(e.key === "ArrowLeft") prev();
   if(e.key === "ArrowRight") next();
 });
 
-// Swipe (mobile)
+// swipe (mobile)
 let startX = null;
-fullImg.addEventListener("touchstart", (e) => {
+lightboxImg.addEventListener("touchstart", (e) => {
   startX = e.touches[0].clientX;
-}, {passive:true});
+}, { passive: true });
 
-fullImg.addEventListener("touchend", (e) => {
+lightboxImg.addEventListener("touchend", (e) => {
   if(startX === null) return;
   const endX = e.changedTouches[0].clientX;
   const dx = endX - startX;
@@ -123,11 +96,11 @@ fullImg.addEventListener("touchend", (e) => {
   if(Math.abs(dx) < 40) return;
   if(dx > 0) prev();
   else next();
-}, {passive:true});
+}, { passive: true });
 
-renderGrid();
+render();
 
-// Deep link ?card=#
+// deep-link support ?card=#
 const params = new URLSearchParams(window.location.search);
 const deep = params.get("card");
 if(deep !== null){
