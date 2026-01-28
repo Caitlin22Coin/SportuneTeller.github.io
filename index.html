@@ -1,487 +1,83 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SPORTUNETELLER</title>
-  <meta name="description" content="SPORTUNETELLER – Sports Tarot Oracle">
-  <style>
-    body {
-      margin: 0;
-      padding: 20px;
-      font-family: 'Courier New', Courier, monospace;
-      background: #f8f8f8;
-      color: #000;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    h1 {
-      font-size: 3.5rem;
-      font-weight: bold;
-      letter-spacing: 4px;
-      margin: 30px 0 10px;
-      color: #000;
-      text-shadow: 2px 2px 0 #fff;
-    }
-    .card-container {
-      width: 100%;
-      max-width: 500px;
-      background: white;
-      border: 4px solid black;
-      box-shadow: 8px 8px 0 #000;
-      padding: 40px 30px;
-      margin: 20px auto;
-      position: relative;
-      min-height: 520px;
-    }
-    .match {
-      position: absolute;
-      top: 15px;
-      right: 20px;
-      font-size: 0.9rem;
-      color: #555;
-      font-weight: bold;
-    }
-    .tarot {
-      font-size: 2.2rem;
-      text-align: center;
-      margin: 0 0 15px;
-      font-style: italic;
-      color: #222;
-      font-weight: bold;
-    }
-    .player {
-      font-size: 2.8rem;
-      font-weight: bold;
-      text-align: center;
-      margin: 0 0 20px;
-      line-height: 1;
-    }
-    .why {
-      font-size: 1.3rem;
-      text-align: center;
-      margin: 0 0 35px;
-      line-height: 1.4;
-      padding: 0 20px;
-    }
-    .prediction {
-      font-size: 1.4rem;
-      font-style: italic;
-      text-align: center;
-      margin: 30px 0;
-      padding: 20px;
-      border-top: 1px solid #ccc;
-      border-bottom: 1px solid #ccc;
-    }
-    .fork {
-      font-size: 1.15rem;
-      margin: 30px 0;
-      text-align: center;
-      padding: 20px;
-      background: #f0f0f0;
-      border-radius: 6px;
-    }
-    .lesson-label {
-      font-size: 1.4rem;
-      font-weight: bold;
-      text-align: center;
-      margin: 30px 0 10px;
-    }
-    .lesson {
-      font-size: 1.2rem;
-      font-style: italic;
-      text-align: center;
-      margin: 0 0 40px;
-      padding: 0 30px;
-      line-height: 1.5;
-    }
-    .date {
-      font-size: 0.95rem;
-      color: #555;
-      text-align: center;
-      margin-top: auto;
-    }
-    button {
-      font-family: inherit;
-      font-size: 1.5rem;
-      font-weight: bold;
-      padding: 18px 50px;
-      background: #000;
-      color: white;
-      border: none;
-      cursor: pointer;
-      margin: 40px auto 20px;
-      display: block;
-      transition: background 0.2s;
-    }
-    button:hover { background: #222; }
-    .beta {
-      font-size: 0.95rem;
-      color: #666;
-      margin-top: 20px;
-    }
-    @media (max-width: 600px) {
-      h1 { font-size: 2.6rem; }
-      .player { font-size: 2.4rem; }
-      .tarot { font-size: 1.8rem; }
-      .card-container { padding: 30px 20px; min-height: 480px; }
-      button { font-size: 1.3rem; padding: 14px 40px; }
-    }
-  </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>SportuneTeller — Tarot of the Gridiron</title>
+  <meta name="description" content="A tarot-inspired gallery of football legends and omens." />
+  <link rel="stylesheet" href="styles.css" />
 </head>
-<body>
-  <h1>SPORTUNETELLER</h1>
-  <p class="tagline">Sports Tarot Oracle – Beta (Unlimited Pulls)</p>
 
-  <div class="card-container">
-    <div class="match" id="match"></div>
-    <div class="tarot" id="tarot"></div>
-    <div class="player" id="player"></div>
-    <div class="why" id="why"></div>
-    <div class="prediction" id="prediction"></div>
-    <div class="fork" id="fork"></div>
-    <div class="lesson-label">LESSON</div>
-    <div class="lesson" id="lesson"></div>
-    <div class="date" id="date"></div>
+<body>
+  <header class="header">
+    <div class="brand">
+      <div class="sigil">♜</div>
+      <div>
+        <h1>SportuneTeller</h1>
+        <p>Tarot of the Gridiron</p>
+      </div>
+    </div>
+
+    <div class="controls">
+      <input id="search" type="search" placeholder="Search player, card, team…" autocomplete="off" />
+      <select id="teamFilter">
+        <option value="all">All teams</option>
+        <option value="patriots">Patriots</option>
+        <option value="seahawks">Seahawks</option>
+      </select>
+      <select id="typeFilter">
+        <option value="all">All cards</option>
+        <option value="major">Major Arcana</option>
+      </select>
+    </div>
+  </header>
+
+  <main class="main">
+    <section class="intro">
+      <div class="intro-card">
+        <h2>The Deck</h2>
+        <p>
+          A sepia-etched, Rider–Waite inspired set of football omens.
+          Click any card to reveal it in full.
+        </p>
+      </div>
+    </section>
+
+    <section id="grid" class="grid" aria-label="Card gallery"></section>
+  </main>
+
+  <!-- Modal Viewer -->
+  <div id="modal" class="modal" aria-hidden="true">
+    <div class="modal-backdrop" id="modalBackdrop"></div>
+    <div class="modal-panel" role="dialog" aria-modal="true" aria-label="Card viewer">
+      <button class="modal-close" id="modalClose" aria-label="Close">✕</button>
+
+      <div class="modal-body">
+        <div class="modal-frame">
+          <img id="modalImg" alt="" />
+        </div>
+
+        <div class="modal-meta">
+          <h3 id="modalTitle"></h3>
+          <p id="modalSubtitle" class="muted"></p>
+          <div class="meta-row">
+            <span class="pill" id="modalTeam"></span>
+            <span class="pill" id="modalArcana"></span>
+          </div>
+          <div class="meta-row">
+            <button id="copyLink" class="btn">Copy link</button>
+            <a id="openImage" class="btn btn-ghost" href="#" target="_blank" rel="noreferrer">Open image</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
   </div>
 
-  <button id="btn">PULL FATE</button>
-  <p class="beta">Beta mode: Pull as often as you want. Feedback welcome.</p>
+  <footer class="footer">
+    <p>© <span id="year"></span> SportuneTeller.com</p>
+  </footer>
 
-  <script>
-    const fortunes = [
-
-  {
-    "match": "Orlando Magic at Cleveland Cavaliers",
-    "player": "Donovan Mitchell",
-    "tarot": "The Chariot",
-    "why": "averaging 26+ PPG in January with 35+ minutes nightly",
-    "pred": "The Chariot signifies victory through focused will, determination, and control over opposing forces.",
-    "omen": "Strong",
-    "window": "Entire game",
-    "fork": {
-      "upright": "Mastery of direction leads to triumph through discipline",
-      "reversed": "Loss of control scatters energy and delays progress"
-    },
-    "lesson": "True progress requires harnessing opposing forces without losing center. Expect steady command to shape the outcome tonight."
-  },
-  {
-    "match": "Portland Trail Blazers at Boston Celtics",
-    "player": "Jayson Tatum",
-    "tarot": "Strength",
-    "why": "consistent 30+ point games in January facing tough defenses",
-    "pred": "Strength represents inner courage, patience, and the gentle taming of raw power.",
-    "omen": "Strong",
-    "window": "Third quarter",
-    "fork": {
-      "upright": "Quiet power overcomes obstacles with compassion",
-      "reversed": "Doubt or aggression weakens resolve"
-    },
-    "lesson": "Endurance arises from gentleness rather than domination. A calm force is likely to prevail in the later stages tonight."
-  },
-  {
-    "match": "Golden State Warriors at Minnesota Timberwolves",
-    "player": "Anthony Edwards",
-    "tarot": "The Fool",
-    "why": "high-volume scoring on heavy minutes in recent road games",
-    "pred": "The Fool embodies innocence, new beginnings, and fearless leaps into the unknown.",
-    "omen": "Chaotic",
-    "window": "Fourth quarter",
-    "fork": {
-      "upright": "Open-hearted daring invites unexpected opportunity",
-      "reversed": "Recklessness invites unnecessary risk"
-    },
-    "lesson": "Beginnings require trust in the unknown without attachment. A bold, unburdened move may define the closing moments tonight."
-  },
-  {
-    "match": "Orlando Magic at Cleveland Cavaliers",
-    "player": "Paolo Banchero",
-    "tarot": "The Magician",
-    "why": "increased playmaking role with 8+ assists in January matchups",
-    "pred": "The Magician symbolizes skill, manifestation, and the ability to channel resources into creation.",
-    "omen": "Fated",
-    "window": "Second quarter",
-    "fork": {
-      "upright": "Aligned tools and intention bring powerful results",
-      "reversed": "Misuse of gifts leads to scattered effort"
-    },
-    "lesson": "Will transforms raw elements when directed with awareness. Creative command is poised to shape the middle frames tonight."
-  },
-  {
-    "match": "Portland Trail Blazers at Boston Celtics",
-    "player": "Jaylen Brown",
-    "tarot": "The Emperor",
-    "why": "defensive assignment on high-usage wings plus 25+ PPG",
-    "pred": "The Emperor stands for structure, authority, stability, and disciplined leadership.",
-    "omen": "Strong",
-    "window": "Entire game",
-    "fork": {
-      "upright": "Order and boundaries create lasting foundation",
-      "reversed": "Rigid control stifles adaptability"
-    },
-    "lesson": "Stability emerges from consistent principle, not force. Structured authority should guide the full contest tonight."
-  },
-  {
-    "match": "Golden State Warriors at Minnesota Timberwolves",
-    "player": "Stephen Curry",
-    "tarot": "The High Priestess",
-    "why": "off-ball movement exploiting mismatches in recent games",
-    "pred": "The High Priestess represents intuition, mystery, inner knowledge, and hidden wisdom.",
-    "omen": "Fated",
-    "window": "Opening quarter",
-    "fork": {
-      "upright": "Inner knowing reveals the unseen path",
-      "reversed": "Surface noise drowns out deeper truth"
-    },
-    "lesson": "Silence and receptivity unveil truths beyond the obvious. Subtle intuition may illuminate the early rhythm tonight."
-  },
-  {
-    "match": "Orlando Magic at Cleveland Cavaliers",
-    "player": "Evan Mobley",
-    "tarot": "The Hermit",
-    "why": "increased defensive minutes anchoring paint protection",
-    "pred": "The Hermit signifies introspection, solitude, inner guidance, and the search for truth.",
-    "omen": "Unstable",
-    "window": "Third quarter",
-    "fork": {
-      "upright": "Withdrawal brings clarity and light",
-      "reversed": "Isolation becomes disconnection"
-    },
-    "lesson": "Seeking within restores vision when outer noise overwhelms. Solitary focus could steady the middle act tonight."
-  },
-  {
-    "match": "Portland Trail Blazers at Boston Celtics",
-    "player": "Derrick White",
-    "tarot": "The Lovers",
-    "why": "defensive switch on perimeter threats with high minutes",
-    "pred": "The Lovers symbolize harmony, choices, union, and alignment of values.",
-    "omen": "Strong",
-    "window": "Second quarter",
-    "fork": {
-      "upright": "Balanced decisions create wholeness",
-      "reversed": "Division fragments harmony"
-    },
-    "lesson": "Integration of dualities brings wholeness and clarity. Aligned choices are likely to influence the flow tonight."
-  },
-  {
-    "match": "Golden State Warriors at Minnesota Timberwolves",
-    "player": "Rudy Gobert",
-    "tarot": "The Hierophant",
-    "why": "rim protection role with consistent blocks in January",
-    "pred": "The Hierophant represents tradition, spiritual wisdom, guidance, and established teachings.",
-    "omen": "Fated",
-    "window": "Entire game",
-    "fork": {
-      "upright": "Conformity to wisdom provides stability",
-      "reversed": "Blind adherence limits growth"
-    },
-    "lesson": "Transmission of knowledge preserves continuity across change. Anchored tradition should hold firm throughout tonight."
-  },
-  {
-    "match": "Orlando Magic at Cleveland Cavaliers",
-    "player": "Franz Wagner",
-    "tarot": "Wheel of Fortune",
-    "why": "streak of double-doubles in recent high-minute games",
-    "pred": "The Wheel of Fortune signifies cycles, change, destiny, and the turning of fate.",
-    "omen": "Chaotic",
-    "window": "Fourth quarter",
-    "fork": {
-      "upright": "Favorable turn elevates position",
-      "reversed": "Unexpected shift challenges adaptation"
-    },
-    "lesson": "Impermanence teaches acceptance of rise and fall. A turning point may arrive in the closing moments tonight."
-  },
-  {
-    "match": "Portland Trail Blazers at Boston Celtics",
-    "player": "Kristaps Porziņģis",
-    "tarot": "Justice",
-    "why": "return from injury with measured minutes and impact",
-    "pred": "Justice embodies fairness, truth, cause and effect, and balanced decisions.",
-    "omen": "Unstable",
-    "window": "Opening quarter",
-    "fork": {
-      "upright": "Equilibrium restores rightful order",
-      "reversed": "Imbalance perpetuates distortion"
-    },
-    "lesson": "Truth applied without favor creates harmony. Balanced consequence should emerge early tonight."
-  },
-  {
-    "match": "Golden State Warriors at Minnesota Timberwolves",
-    "player": "Karl-Anthony Towns",
-    "tarot": "The Hanged Man",
-    "why": "shifted role with increased rebounding in January",
-    "pred": "The Hanged Man represents surrender, new perspective, sacrifice, and letting go.",
-    "omen": "Chaotic",
-    "window": "Third quarter",
-    "fork": {
-      "upright": "Release opens transformed understanding",
-      "reversed": "Resistance prolongs stagnation"
-    },
-    "lesson": "Letting go of old views allows fresh insight. A shifted perspective could define the middle act tonight."
-  },
-  {
-    "match": "Orlando Magic at Cleveland Cavaliers",
-    "player": "Jarrett Allen",
-    "tarot": "Death",
-    "why": "rebound surge in recent matchups against smaller fronts",
-    "pred": "Death symbolizes transformation, endings, transition, and necessary release.",
-    "omen": "Fated",
-    "window": "Entire game",
-    "fork": {
-      "upright": "Letting go makes way for rebirth",
-      "reversed": "Clinging delays inevitable change"
-    },
-    "lesson": "Death of the old is the gateway to new life. A profound shift is likely to unfold across the full contest tonight."
-  },
-  {
-    "match": "Portland Trail Blazers at Boston Celtics",
-    "player": "Al Horford",
-    "tarot": "Temperance",
-    "why": "veteran minutes management blending offense and defense",
-    "pred": "Temperance signifies balance, moderation, harmony, and integration of opposites.",
-    "omen": "Strong",
-    "window": "Second quarter",
-    "fork": {
-      "upright": "Blending creates steady flow",
-      "reversed": "Extremes create tension"
-    },
-    "lesson": "Balance between opposites fosters enduring equilibrium. Moderation should guide the early middle frames tonight."
-  },
-  {
-    "match": "Golden State Warriors at Minnesota Timberwolves",
-    "player": "Julius Randle",
-    "tarot": "The Devil",
-    "why": "high usage in isolation plays against perimeter defense",
-    "pred": "The Devil represents bondage, materialism, addiction, and shadow aspects.",
-    "omen": "Chaotic",
-    "window": "Fourth quarter",
-    "fork": {
-      "upright": "Awareness frees from limiting patterns",
-      "reversed": "Unconscious habits tighten control"
-    },
-    "lesson": "Recognition of attachments frees authentic movement. Hidden constraints may surface in the closing act tonight."
-  },
-  {
-    "match": "Orlando Magic at Cleveland Cavaliers",
-    "player": "Jalen Suggs",
-    "tarot": "The Tower",
-    "why": "increased defensive steals disrupting primary ball-handlers",
-    "pred": "The Tower signifies sudden upheaval, revelation, destruction of false structures.",
-    "omen": "Chaotic",
-    "window": "Opening quarter",
-    "fork": {
-      "upright": "Breakdown awakens necessary truth",
-      "reversed": "Collapse without rebuilding leads to ruin"
-    },
-    "lesson": "False foundations must fall to allow true rebuilding. A shock may clear illusions early tonight."
-  },
-  {
-    "match": "Portland Trail Blazers at Boston Celtics",
-    "player": "Anfernee Simons",
-    "tarot": "The Star",
-    "why": "shooting streak from deep in January road games",
-    "pred": "The Star represents hope, inspiration, serenity, healing, and renewed faith.",
-    "omen": "Fated",
-    "window": "Third quarter",
-    "fork": {
-      "upright": "Gentle light restores and guides",
-      "reversed": "Doubt obscures renewal"
-    },
-    "lesson": "Faith in renewal sustains through dark periods. Quiet inspiration is likely to rise in the later stages tonight."
-  },
-  {
-    "match": "Golden State Warriors at Minnesota Timberwolves",
-    "player": "Mike Conley",
-    "tarot": "The Moon",
-    "why": "veteran minutes navigating pick-and-roll confusion",
-    "pred": "The Moon signifies illusion, intuition, fear, subconscious, and uncertainty.",
-    "omen": "Unstable",
-    "window": "Second quarter",
-    "fork": {
-      "upright": "Intuition navigates hidden truths",
-      "reversed": "Fear creates deception"
-    },
-    "lesson": "Discernment separates truth from shadow. Unseen currents may test perception tonight."
-  },
-  {
-    "match": "Orlando Magic at Cleveland Cavaliers",
-    "player": "Darius Garland",
-    "tarot": "The Sun",
-    "why": "high assist totals in recent high-pace games",
-    "pred": "The Sun embodies joy, success, vitality, clarity, and radiant energy.",
-    "omen": "Strong",
-    "window": "Entire game",
-    "fork": {
-      "upright": "Light and warmth bring fulfillment",
-      "reversed": "Temporary eclipse dims clarity"
-    },
-    "lesson": "Authentic expression brings warmth to the whole. Radiance should illuminate the full contest tonight."
-  },
-  {
-    "match": "Portland Trail Blazers at Boston Celtics",
-    "player": "Payton Pritchard",
-    "tarot": "Judgement",
-    "why": "bench spark with increased minutes off the bench",
-    "pred": "Judgement signifies awakening, rebirth, reckoning, and higher calling.",
-    "omen": "Fated",
-    "window": "Fourth quarter",
-    "fork": {
-      "upright": "Renewal and clarity arise from the call",
-      "reversed": "Resistance delays awakening"
-    },
-    "lesson": "Honest reckoning opens the door to rebirth. A decisive awakening may arrive in the closing moments tonight."
-  },
-  {
-    "match": "Golden State Warriors at Minnesota Timberwolves",
-    "player": "Draymond Green",
-    "tarot": "The World",
-    "why": "defensive versatility anchoring multiple lineups",
-    "pred": "The World represents completion, integration, wholeness, and fulfillment of a cycle.",
-    "omen": "Strong",
-    "window": "Entire game",
-    "fork": {
-      "upright": "Unity and achievement bring closure",
-      "reversed": "Incomplete cycles leave loose ends"
-    },
-    "lesson": "Wholeness arrives when every element finds its place. Integration should define the entire contest tonight."
-  }
-
-      // Add more entries here later – this one is enough to run
-    ];
-
-    const btn = document.getElementById('btn');
-    const matchEl = document.getElementById('match');
-    const tarotEl = document.getElementById('tarot');
-    const playerEl = document.getElementById('player');
-    const whyEl = document.getElementById('why');
-    const predEl = document.getElementById('prediction');
-    const forkEl = document.getElementById('fork');
-    const lessonEl = document.getElementById('lesson');
-    const dateEl = document.getElementById('date');
-
-    btn.addEventListener('click', () => {
-      const f = fortunes[Math.floor(Math.random() * fortunes.length)];
-      const isReversed = Math.random() < 0.5; // 50/50 for beta testing
-
-      matchEl.textContent = f.match;
-      tarotEl.textContent = isReversed ? f.tarot + " (Reversed)" : f.tarot;
-      playerEl.textContent = f.player;
-      whyEl.textContent = f.why;
-      predEl.textContent = f.pred;
-
-      forkEl.innerHTML = `
-        <strong>${isReversed ? "Reversed" : "Upright"}:</strong><br>
-        ${isReversed ? f.fork.reversed : f.fork.upright}
-      `;
-
-      lessonEl.textContent = f.lesson;
-      dateEl.textContent = new Date().toLocaleString();
-
-      document.querySelector('.card-container').classList.add('revealed');
-      btn.textContent = "PULL AGAIN";
-    });
-  </script>
+  <script src="app.js"></script>
 </body>
 </html>
