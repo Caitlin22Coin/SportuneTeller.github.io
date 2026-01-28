@@ -1,154 +1,138 @@
-const CARDS = [
-  // Replace these with your real filenames & metadata
-  {
-    id: "judgment-xx-referees",
-    title: "Judgment",
-    subtitle: "Final call on the biggest stage",
-    team: "neutral",
-    arcana: "major",
-    numeral: "XX",
-    img: "assets/cards/judgment-xx-referees.jpg",
-    thumb: "assets/cards/judgment-xx-referees.jpg",
-    tags: ["Judgment", "Referees", "XX"]
-  },
-  {
-    id: "temperance-bentley",
-    title: "Temperance",
-    subtitle: "Ja'Whaun Bentley — Patriots #8",
-    team: "patriots",
-    arcana: "major",
-    numeral: "XIV",
-    img: "assets/cards/temperance-xiv-bentley.jpg",
-    thumb: "assets/cards/temperance-xiv-bentley.jpg",
-    tags: ["Bentley", "Temperance", "Patriots"]
-  },
-  {
-    id: "moon-fant",
-    title: "The Moon",
-    subtitle: "Noah Fant — Seahawks #87",
-    team: "seahawks",
-    arcana: "major",
-    numeral: "XVIII",
-    img: "assets/cards/the-moon-xviii-fant.jpg",
-    thumb: "assets/cards/the-moon-xviii-fant.jpg",
-    tags: ["Fant", "Moon", "Seahawks"]
-  },
-  // Add the rest...
+const BASE = "assets/cards/";
+
+const FILES = [
+  "chariot.png",
+  "death.png",
+  "devil.png",
+  "emperor.png",
+  "empress.png",
+  "fool.png",
+  "hermit.png",
+  "hierophant.png",
+  "highpriestess.png",
+  "judgment.png",
+  "justice.png",
+  "magician.png",
+  "moon.png",
+  "star.png",
+  "strength.png",
+  "sun.png",
+  "temperance.png",
+  "tower.png",
+  "wheel.png",
+  "world.png",
 ];
 
+const prettyName = (file) =>
+  file.replace(".png","").replace(/[-_]/g," ").trim();
+
 const grid = document.getElementById("grid");
-const search = document.getElementById("search");
-const teamFilter = document.getElementById("teamFilter");
-const typeFilter = document.getElementById("typeFilter");
 
-const modal = document.getElementById("modal");
-const modalBackdrop = document.getElementById("modalBackdrop");
-const modalClose = document.getElementById("modalClose");
-const modalImg = document.getElementById("modalImg");
-const modalTitle = document.getElementById("modalTitle");
-const modalSubtitle = document.getElementById("modalSubtitle");
-const modalTeam = document.getElementById("modalTeam");
-const modalArcana = document.getElementById("modalArcana");
-const copyLink = document.getElementById("copyLink");
-const openImage = document.getElementById("openImage");
+const viewer = document.getElementById("viewer");
+const backdrop = document.getElementById("backdrop");
+const closeBtn = document.getElementById("closeBtn");
+const prevBtn = document.getElementById("prevBtn");
+const nextBtn = document.getElementById("nextBtn");
+const openBtn = document.getElementById("openBtn");
+const fullImg = document.getElementById("fullImg");
+const cardName = document.getElementById("cardName");
 
-document.getElementById("year").textContent = new Date().getFullYear();
+let currentIndex = 0;
 
-function teamLabel(team){
-  if(team === "patriots") return "Patriots";
-  if(team === "seahawks") return "Seahawks";
-  return "Neutral";
-}
-
-function render(cards){
+function renderGrid(){
   grid.innerHTML = "";
-  cards.forEach(card => {
-    const el = document.createElement("article");
-    el.className = "card";
-    el.tabIndex = 0;
-    el.innerHTML = `
-      <img class="thumb" loading="lazy" src="${card.thumb}" alt="${card.title} (${card.numeral})" />
-      <div class="card-meta">
-        <h3>${card.title} <span class="muted">(${card.numeral})</span></h3>
-        <p>${card.subtitle}</p>
-        <div class="pills">
-          <span class="pill">${teamLabel(card.team)}</span>
-          <span class="pill">${card.arcana === "major" ? "Major Arcana" : "Minor Arcana"}</span>
-        </div>
-      </div>
+  FILES.forEach((file, idx) => {
+    const tile = document.createElement("article");
+    tile.className = "tile";
+    tile.tabIndex = 0;
+
+    tile.innerHTML = `
+      <img class="thumb" loading="lazy" src="${BASE + file}" alt="${prettyName(file)}" />
+      <div class="caption">${prettyName(file)}</div>
     `;
-    el.addEventListener("click", () => openModal(card));
-    el.addEventListener("keydown", (e) => {
-      if(e.key === "Enter" || e.key === " ") openModal(card);
+
+    tile.addEventListener("click", () => openAt(idx));
+    tile.addEventListener("keydown", (e) => {
+      if(e.key === "Enter" || e.key === " ") openAt(idx);
     });
-    grid.appendChild(el);
+
+    grid.appendChild(tile);
   });
 }
 
-function openModal(card){
-  modal.setAttribute("aria-hidden", "false");
-  document.body.style.overflow = "hidden";
-
-  modalImg.src = card.img;
-  modalImg.alt = `${card.title} (${card.numeral})`;
-  modalTitle.textContent = `${card.title} (${card.numeral})`;
-  modalSubtitle.textContent = card.subtitle;
-  modalTeam.textContent = teamLabel(card.team);
-  modalArcana.textContent = card.arcana === "major" ? "Major Arcana" : "Minor Arcana";
-
+function setUrl(idx){
   const url = new URL(window.location.href);
-  url.searchParams.set("card", card.id);
+  url.searchParams.set("card", String(idx));
   history.replaceState({}, "", url);
-  openImage.href = card.img;
-
-  copyLink.onclick = async () => {
-    await navigator.clipboard.writeText(url.toString());
-    copyLink.textContent = "Copied!";
-    setTimeout(() => (copyLink.textContent = "Copy link"), 900);
-  };
 }
 
-function closeModal(){
-  modal.setAttribute("aria-hidden", "true");
-  document.body.style.overflow = "";
-
+function clearUrl(){
   const url = new URL(window.location.href);
   url.searchParams.delete("card");
   history.replaceState({}, "", url);
 }
 
-modalBackdrop.addEventListener("click", closeModal);
-modalClose.addEventListener("click", closeModal);
-document.addEventListener("keydown", (e) => {
-  if(e.key === "Escape" && modal.getAttribute("aria-hidden") === "false") closeModal();
-});
+function openAt(idx){
+  currentIndex = (idx + FILES.length) % FILES.length;
+  const file = FILES[currentIndex];
 
-function applyFilters(){
-  const q = (search.value || "").trim().toLowerCase();
-  const team = teamFilter.value;
-  const type = typeFilter.value;
+  viewer.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden";
 
-  const filtered = CARDS.filter(c => {
-    const matchesTeam = (team === "all") || (c.team === team);
-    const matchesType = (type === "all") || (c.arcana === type);
-    const hay = [c.title, c.subtitle, c.numeral, ...(c.tags || [])].join(" ").toLowerCase();
-    const matchesQuery = !q || hay.includes(q);
-    return matchesTeam && matchesType && matchesQuery;
-  });
+  fullImg.src = BASE + file;
+  fullImg.alt = prettyName(file);
+  cardName.textContent = prettyName(file);
 
-  render(filtered);
+  openBtn.href = BASE + file;
+
+  setUrl(currentIndex);
 }
 
-search.addEventListener("input", applyFilters);
-teamFilter.addEventListener("change", applyFilters);
-typeFilter.addEventListener("change", applyFilters);
+function closeViewer(){
+  viewer.setAttribute("aria-hidden", "true");
+  document.body.style.overflow = "";
+  clearUrl();
+}
 
-render(CARDS);
+function prev(){ openAt(currentIndex - 1); }
+function next(){ openAt(currentIndex + 1); }
 
-// Deep link support ?card=
+backdrop.addEventListener("click", closeViewer);
+closeBtn.addEventListener("click", closeViewer);
+prevBtn.addEventListener("click", prev);
+nextBtn.addEventListener("click", next);
+
+document.addEventListener("keydown", (e) => {
+  if(viewer.getAttribute("aria-hidden") === "true") return;
+  if(e.key === "Escape") closeViewer();
+  if(e.key === "ArrowLeft") prev();
+  if(e.key === "ArrowRight") next();
+});
+
+// Swipe (mobile)
+let startX = null;
+fullImg.addEventListener("touchstart", (e) => {
+  startX = e.touches[0].clientX;
+}, {passive:true});
+
+fullImg.addEventListener("touchend", (e) => {
+  if(startX === null) return;
+  const endX = e.changedTouches[0].clientX;
+  const dx = endX - startX;
+  startX = null;
+  if(Math.abs(dx) < 40) return;
+  if(dx > 0) prev();
+  else next();
+}, {passive:true});
+
+renderGrid();
+
+// Deep link ?card=#
 const params = new URLSearchParams(window.location.search);
-const deepId = params.get("card");
-if(deepId){
-  const found = CARDS.find(c => c.id === deepId);
-  if(found) openModal(found);
+const deep = params.get("card");
+if(deep !== null){
+  const idx = Number(deep);
+  if(Number.isFinite(idx) && idx >= 0 && idx < FILES.length){
+    openAt(idx);
+  }
 }
