@@ -1,0 +1,38 @@
+:root{
+  --bg: #f3ead7;
+  --ink: #1b1b1b;
+  --muted: #4a433a;
+  --paper: rgba(255,255,255,0.35);
+  --frame: rgba(30, 20, 10, 0.55);
+  --shadow: rgba(0,0,0,0.22);
+  --ring: rgba(35, 25, 15, 0.25);
+}
+
+*{ box-sizing:border-box; }
+html,body{ height:100%; }
+body{
+  margin:0;
+  color:var(--ink);
+  font-family: ui-serif, Georgia, "Times New Roman", serif;
+  background:
+    radial-gradient(1200px 800px at 20% 10%, rgba(255,255,255,0.45), transparent 60%),
+    radial-gradient(900px 600px at 80% 30%, rgba(255,255,255,0.35), transparent 55%),
+    linear-gradient(180deg, #f7efdf, #efe2c7);
+}
+
+.header{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-end;
+  gap:16px;
+  padding:22px clamp(16px, 4vw, 44px);
+  border-bottom: 1px solid rgba(0,0,0,0.10);
+}
+
+.brand{ display:flex; gap:14px; align-items:center; }
+.sigil{
+  width:44px; height:44px;
+  display:grid; place-items:center;
+  border:1px solid rgba(0,0,0,0.18);
+  border-radius:12px;
+  background:
