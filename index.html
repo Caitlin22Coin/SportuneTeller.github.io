@@ -1,23 +1,686 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>SportuneTeller</title>
-  <meta name="description" content="SportuneTeller" />
-  <link rel="stylesheet" href="style.css" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>SportuneTeller</title>
+
+<!-- Social previews (site-wide; hash links won't generate unique previews per card) -->
+<meta property="og:site_name" content="SportuneTeller" />
+<meta property="og:title" content="SportuneTeller" />
+<meta property="og:description" content="Tarot meets football. Tap a card to reveal the fortune." />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://sportuneteller.com/" />
+<meta property="og:image" content="https://sportuneteller.com/assets/cards/fool.png" />
+<meta name="twitter:card" content="summary_large_image" />
+
+<style>
+:root{
+  --bg:#f4ead8;
+  --panel:#fff6e6;
+  --ink:#1f1b16;
+  --muted:#5b5249;
+  --line:rgba(31,27,22,.22);
+  --shadow:0 10px 30px rgba(31,27,22,.12);
+  --radius:18px;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+  color:var(--ink);
+  background:
+    radial-gradient(1200px 600px at 20% -10%, rgba(111,147,173,.20), transparent 60%),
+    radial-gradient(900px 500px at 95% 10%, rgba(199,176,139,.25), transparent 55%),
+    linear-gradient(180deg,var(--bg),#f7efdf 55%,var(--bg));
+}
+header{
+  position:sticky;top:0;z-index:10;
+  background:rgba(244,234,216,.92);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);
+}
+.header-inner{
+  max-width:1100px;margin:auto;padding:14px;
+  display:flex;align-items:baseline;gap:12px;
+}
+h1{margin:0;font-size:20px;letter-spacing:.5px;text-transform:uppercase}
+.tag{font-size:12px;color:var(--muted);border-left:1px solid var(--line);padding-left:10px;line-height:1.2}
+
+.wrap{max-width:1100px;margin:auto;padding:18px 14px 34px}
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(165px,1fr));
+  gap:14px;
+}
+.card{
+  display:flex;flex-direction:column;
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  background:rgba(255,246,230,.78);
+  box-shadow:var(--shadow);
+  overflow:hidden;
+  text-decoration:none;
+  color:inherit;
+  transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+}
+.card:active{transform:scale(.99)}
+@media(hover:hover){
+  .card:hover{
+    transform:translateY(-2px);
+    box-shadow:0 16px 40px rgba(31,27,22,.16);
+    border-color:rgba(31,27,22,.32);
+  }
+}
+.thumb{aspect-ratio:3/4;position:relative;border-bottom:1px solid var(--line);background:rgba(244,234,216,.55)}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.badge{
+  position:absolute;top:10px;left:10px;
+  background:rgba(31,27,22,.78);
+  color:#fff6e6;
+  padding:6px 10px;
+  border-radius:999px;
+  font-size:12px;
+  border:1px solid rgba(255,246,230,.35);
+}
+.meta{padding:12px;display:flex;flex-direction:column;gap:6px}
+.line1{font-weight:800;font-size:13px;line-height:1.25}
+.line2{font-size:12.5px;color:var(--muted);line-height:1.25}
+.footer{text-align:center;font-size:12px;color:var(--muted);margin-top:18px;opacity:.9}
+
+/* Lightbox via :target */
+.lightbox{
+  position:fixed;inset:0;
+  display:none;
+  align-items:center;justify-content:center;
+  background:rgba(31,27,22,.75);
+  backdrop-filter:blur(6px);
+  padding:16px;
+  z-index:999;
+}
+.lightbox:target{display:flex}
+.modal-inner{
+  width:min(980px,96vw);
+  max-height:92vh;
+  background:rgba(255,246,230,.95);
+  border-radius:20px;
+  overflow:hidden;
+  box-shadow:0 30px 80px rgba(0,0,0,.35);
+  display:grid;
+  grid-template-columns:1.2fr .8fr;
+}
+@media(max-width:860px){.modal-inner{grid-template-columns:1fr}}
+.modal-media{
+  background:rgba(244,234,216,.7);
+  border-right:1px solid rgba(31,27,22,.12);
+}
+@media(max-width:860px){.modal-media{border-right:0;border-bottom:1px solid rgba(31,27,22,.12)}}
+.modal-media img{
+  width:100%;height:100%;
+  max-height:92vh;
+  object-fit:contain;
+  padding:10px;
+  display:block;
+}
+.modal-meta{
+  padding:14px;
+  overflow:auto;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.modal-top{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  align-items:flex-start;
+}
+.modal-title{margin:0;font-size:18px}
+.modal-sub{margin:0;font-size:13px;color:var(--muted);line-height:1.35}
+.modal-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.btn{
+  border:1px solid var(--line);
+  background:rgba(255,246,230,.7);
+  padding:10px 12px;
+  border-radius:12px;
+  font-weight:800;
+  text-decoration:none;
+  color:var(--ink);
+  cursor:pointer;
+}
+.section-title{
+  font-size:12px;
+  font-weight:900;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:rgba(31,27,22,.75);
+  margin:0 0 6px 0;
+}
+.box{
+  padding:12px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:rgba(244,234,216,.55);
+  font-size:14px;
+  line-height:1.5;
+  white-space:pre-wrap;
+}
+.footnotes{
+  margin-top:auto;
+  padding-top:10px;
+  border-top:1px solid rgba(31,27,22,.12);
+  font-size:12px;
+  color:var(--muted);
+  line-height:1.5;
+}
+.footnotes a{color:inherit;text-decoration:underline;text-underline-offset:2px}
+.footnotes .label{
+  font-weight:900;
+  letter-spacing:.10em;
+  text-transform:uppercase;
+  font-size:11px;
+  color:rgba(31,27,22,.70);
+  margin-bottom:6px;
+}
+.footnotes .links{display:flex;flex-wrap:wrap;gap:10px 14px}
+</style>
 </head>
+
 <body>
-  <header class="header">SportuneTeller</header>
-
-  <main id="gallery" class="gallery" aria-label="Gallery"></main>
-
-  <!-- Tap to view full screen -->
-  <div id="lightbox" class="lightbox" aria-hidden="true">
-    <button id="close" class="close" aria-label="Close">✕</button>
-    <img id="lightboxImg" alt="" />
+<header>
+  <div class="header-inner">
+    <h1>SportuneTeller</h1>
+    <div class="tag">Tarot draw<br>player reveal</div>
   </div>
+</header>
 
-  <script src="app.js"></script>
+<main class="wrap">
+  <section class="grid">
+    <!-- 1 -->
+    <a class="card" href="#c1"><div class="thumb"><img src="https://guardianlawn.online/sportuneteller/assets/cards/fool.png" alt="The Fool"><div class="badge">0</div></div><div class="meta"><div class="line1">Drake Maye - QB - Patriots - #10</div><div class="line2">The Fool - 0</div></div></a>
+    <!-- 2 -->
+    <a class="card" href="#c2"><div class="thumb"><img src="https://guardianlawn.online/sportuneteller/assets/cards/magician.png" alt="The Magician"><div class="badge">I</div></div><div class="meta"><div class="line1">Sam Darnold - QB - Seahawks - #14</div><div class="line2">The Magician - I</div></div></a>
+    <!-- 3 -->
+    <a class="card" href="#c3"><div class="thumb"><img src="https://guardianlawn.online/sportuneteller/assets/cards/emperor.png" alt="The Emperor"><div class="badge">IV</div></div><div class="meta"><div class="line1">Mike Vrabel - Head Coach - Patriots</div><div class="line2">The Emperor - IV</div></div></a>
+    <!-- 4 -->
+    <a class="card" href="#c4"><div class="thumb"><img src="https://guardianlawn.online/sportuneteller/assets/cards/hierophant.png" alt="The Hierophant"><div class="badge">V</div></div><div class="meta"><div class="line1">Mike Macdonald - Head Coach - Seahawks</div><div class="line2">The Hierophant - V</div></div></a>
+    <!-- 5 -->
+    <a class="card" href="#c5"><div class="thumb"><img src="https://guardianlawn.online/sportuneteller/assets/cards/star.png" alt="The Star"><div class="badge">XVII</div></div><div class="meta"><div class="line1">Jaxon Smith-Njigba - WR - Seahawks - #11</div><div class="line2">The Star - XVII</div></div></a>
+    <!-- 6 -->
+    <a class="card" href="#c6"><div class="thumb"><img src="https://guardianlawn.online/sportuneteller/assets/cards/justice.png" alt="Justice"><div class="badge">XI</div></div><div class="meta"><div class="line1">Christian Gonzalez - CB - Patriots - #6</div><div class="line2">Justice - XI</div></div></a>
+    <!-- 7 -->
+    <a class="card" href="#c7"><div class="thumb"><img src="https://guardianlawn.online/sportuneteller/assets/cards/strength.png" alt="Strength"><div class="badge">VIII</div></div><div class="meta"><div class="line1">Devon Witherspoon - CB - Seahawks - #21</div><div class="line2">Strength - VIII</div></div></a>
+    <!-- 8 -->
+    <a class="card" href="#c8"><div class="thumb"><img src="https://guardianlawn.online/sportuneteller/assets/cards/chariot.png" alt="The Chariot"><div class="badge">VII</div></div><div class="meta"><div class="line1">Rhamondre Stevenson - RB - Patriots - #38</div><div class="line2">The Chariot - VII</div></div></a>
+    <!-- 9 -->
+    <a class="card" href="#c9"><div class="thumb"><img src="https://guardianlawn.online/sportuneteller/assets/cards/wheel.png" alt="The Wheel of Fortune"><div class="badge">X</div></div><div class="meta"><div class="line1">Kenneth Walker III - RB - Seahawks - #9</div><div class="line2">The Wheel of Fortune - X</div></div></a>
+    <!-- 10 -->
+    <a class="card" href="#c10"><div class="thumb"><img src="https://guardianlawn.online/sportuneteller/assets/cards/hermit.png" alt="The Hermit"><div class="badge">IX</div></div><div class="meta"><div class="line1">Matthew Slater - Special Teams - Patriots - #18</div><div class="line2">The Hermit - IX</div></div></a>
+    <!-- 11 -->
+    <a class="card" href="#c11"><div class="thumb"><img src="https://guardianlawn.online/sportuneteller/assets/cards/highpriestess.png" alt="The High Priestess"><div class="badge">II</div></div><div class="meta"><div class="line1">Julian Love - S - Seahawks - #20</div><div class="line2">The High Priestess - II</div></div></a>
+    <!-- 12 -->
+    <a class="card" href="#c12"><div class="thumb"><img src="https://guardianlawn.online/sportuneteller/assets/cards/tower.png" alt="The Tower"><div class="badge">XVI</div></div><div class="meta"><div class="line1">Christian Barmore - DT - Patriots - #90</div><div class="line2">The Tower - XVI</div></div></a>
+    <!-- 13 -->
+    <a class="card" href="#c13"><div class="thumb"><img src="https://guardianlawn.online/sportuneteller/assets/cards/death.png" alt="Death"><div class="badge">XIII</div></div><div class="meta"><div class="line1">Leonard Williams - DL - Seahawks - #99</div><div class="line2">Death - XIII</div></div></a>
+    <!-- 14 -->
+    <a class="card" href="#c14"><div class="thumb"><img src="https://guardianlawn.online/sportuneteller/assets/cards/hangedman.png" alt="The Hanged Man"><div class="badge">XII</div></div><div class="meta"><div class="line1">Anfernee Jennings - EDGE - Patriots - #58</div><div class="line2">The Hanged Man - XII</div></div></a>
+    <!-- 15 -->
+    <a class="card" href="#c15"><div class="thumb"><img src="https://guardianlawn.online/sportuneteller/assets/cards/devil.png" alt="The Devil"><div class="badge">XV</div></div><div class="meta"><div class="line1">Boye Mafe - EDGE - Seahawks - #53</div><div class="line2">The Devil - XV</div></div></a>
+    <!-- 16 -->
+    <a class="card" href="#c16"><div class="thumb"><img src="https://guardianlawn.online/sportuneteller/assets/cards/lovers.png" alt="The Lovers"><div class="badge">VI</div></div><div class="meta"><div class="line1">Kendrick Bourne - WR - Patriots - #84</div><div class="line2">The Lovers - VI</div></div></a>
+    <!-- 17 -->
+    <a class="card" href="#c17"><div class="thumb"><img src="https://guardianlawn.online/sportuneteller/assets/cards/empress.png" alt="The Empress"><div class="badge">III</div></div><div class="meta"><div class="line1">Mike Gesicki - TE - Patriots - #88</div><div class="line2">The Empress - III</div></div></a>
+    <!-- 18 -->
+    <a class="card" href="#c18"><div class="thumb"><img src="https://guardianlawn.online/sportuneteller/assets/cards/moon.png" alt="The Moon"><div class="badge">XVIII</div></div><div class="meta"><div class="line1">Noah Fant - TE - Seahawks - #87</div><div class="line2">The Moon - XVIII</div></div></a>
+    <!-- 19 -->
+    <a class="card" href="#c19"><div class="thumb"><img src="https://guardianlawn.online/sportuneteller/assets/cards/temperance.png" alt="Temperance"><div class="badge">XIV</div></div><div class="meta"><div class="line1">Ja’Whaun Bentley - LB - Patriots - #8</div><div class="line2">Temperance - XIV</div></div></a>
+    <!-- 20 -->
+    <a class="card" href="#c20"><div class="thumb"><img src="https://guardianlawn.online/sportuneteller/assets/cards/sun.png" alt="The Sun"><div class="badge">XIX</div></div><div class="meta"><div class="line1">Jordyn Brooks - LB - Seahawks - #56</div><div class="line2">The Sun - XIX</div></div></a>
+    <!-- 21 -->
+    <a class="card" href="#c21"><div class="thumb"><img src="https://guardianlawn.online/sportuneteller/assets/cards/world.png" alt="The World"><div class="badge">XXI</div></div><div class="meta"><div class="line1">Super Bowl LX</div><div class="line2">The World - XXI</div></div></a>
+    <!-- 22 -->
+    <a class="card" href="#c22"><div class="thumb"><img src="https://guardianlawn.online/sportuneteller/assets/cards/judgment.png" alt="Judgment"><div class="badge">XX</div></div><div class="meta"><div class="line1">Officials</div><div class="line2">Judgment - XX</div></div></a>
+  </section>
+
+  <div class="footer">Tap any card to reveal its fortune. If you land on a huge card page, remove the <strong>#c##</strong> from the URL.</div>
+</main>
+
+<!-- MODAL TEMPLATE: includes Share + Footnotes on every expanded view -->
+<!-- Betting / prediction links -->
+<!-- DraftKings refer -->
+<!-- Polymarket props -->
+<!-- Kalshi odds -->
+<!-- Bovada -->
+<!-- (Your URLs are used exactly as provided.) -->
+
+<!-- c1 -->
+<section id="c1" class="lightbox">
+  <div class="modal-inner">
+    <div class="modal-media"><img src="https://guardianlawn.online/sportuneteller/assets/cards/fool.png" alt="The Fool"></div>
+    <div class="modal-meta">
+      <div class="modal-top">
+        <div><h2 class="modal-title">Drake Maye — #10</h2><p class="modal-sub">QB, Patriots • The Fool (0)</p></div>
+        <div class="modal-actions">
+          <button class="btn" type="button" data-share-btn>Share</button>
+          <a class="btn" href="#">Close</a>
+        </div>
+      </div>
+      <div><div class="section-title">Description</div><div class="box">Young, bold, high-upside rookie sensation stepping into the spotlight with fearless potential and a big leap into the unknown.</div></div>
+      <div><div class="section-title">Fortune</div><div class="box">With <strong>The Fool</strong>, Drake Maye steps into the Super Bowl unburdened, trusting instinct over script as the game bends to his courage.
+The lines whisper 20 completions, 225 yards, and two scores—but the card hints at one reckless throw that becomes the turning point, not the mistake.
+Win or loss, his leap reshapes the night: destiny favors the brave who don’t look down.</div></div>
+      <div><div class="section-title">Meaning</div><div class="box">The Fool embodies innocence, new beginnings, fearless leaps into the unknown, and boundless potential at the start of a journey.</div></div>
+      <div class="footnotes"><div class="label">Footnotes</div><div class="links">
+        <a href="https://sportsbook.draftkings.com/r/sb/jasnlcas/US-IA-SB/US-IA" target="_blank" rel="noopener">DraftKings (refer)</a>
+        <a href="https://polymarket.com/sports/nfl/props" target="_blank" rel="noopener">Polymarket (NFL props)</a>
+        <a href="https://kalshi.com/markets/kxsb/super-bowl/kxsb-26" target="_blank" rel="noopener">Kalshi (SB odds)</a>
+        <a href="https://www.bovada.lv/welcome/P2JTOAM/join" target="_blank" rel="noopener">Bovada</a>
+      </div></div>
+    </div>
+  </div>
+</section>
+
+<!-- c2 -->
+<section id="c2" class="lightbox">
+  <div class="modal-inner">
+    <div class="modal-media"><img src="https://guardianlawn.online/sportuneteller/assets/cards/magician.png" alt="The Magician"></div>
+    <div class="modal-meta">
+      <div class="modal-top">
+        <div><h2 class="modal-title">Sam Darnold — #14</h2><p class="modal-sub">QB, Seahawks • The Magician (I)</p></div>
+        <div class="modal-actions">
+          <button class="btn" type="button" data-share-btn>Share</button>
+          <a class="btn" href="#">Close</a>
+        </div>
+      </div>
+      <div><div class="section-title">Description</div><div class="box">Resourceful veteran who’s reinvented himself, turning tools and skills into magic on the field—manifesting comebacks and big plays.</div></div>
+      <div><div class="section-title">Fortune</div><div class="box">With <strong>The Magician</strong>, Sam Darnold plays as if intention alone can shape the night, every throw an act of belief.
+The line calls for 235 yards, 20 completions, and 2.5 touchdowns—but the card suggests the real magic is efficiency, not excess, with one moment outweighing the totals.
+If it breaks his way, this isn’t just execution; it’s a quiet reinvention sealed on the biggest stage.</div></div>
+      <div><div class="section-title">Meaning</div><div class="box">The Magician symbolizes skill, manifestation, resourcefulness, and the ability to channel will and tools into tangible creation and transformation.</div></div>
+      <div class="footnotes"><div class="label">Footnotes</div><div class="links">
+        <a href="https://sportsbook.draftkings.com/r/sb/jasnlcas/US-IA-SB/US-IA" target="_blank" rel="noopener">DraftKings (refer)</a>
+        <a href="https://polymarket.com/sports/nfl/props" target="_blank" rel="noopener">Polymarket (NFL props)</a>
+        <a href="https://kalshi.com/markets/kxsb/super-bowl/kxsb-26" target="_blank" rel="noopener">Kalshi (SB odds)</a>
+        <a href="https://www.bovada.lv/welcome/P2JTOAM/join" target="_blank" rel="noopener">Bovada</a>
+      </div></div>
+    </div>
+  </div>
+</section>
+
+<!-- c3 -->
+<section id="c3" class="lightbox">
+  <div class="modal-inner">
+    <div class="modal-media"><img src="https://guardianlawn.online/sportuneteller/assets/cards/emperor.png" alt="The Emperor"></div>
+    <div class="modal-meta">
+      <div class="modal-top">
+        <div><h2 class="modal-title">Mike Vrabel</h2><p class="modal-sub">Head Coach, Patriots • The Emperor (IV)</p></div>
+        <div class="modal-actions">
+          <button class="btn" type="button" data-share-btn>Share</button>
+          <a class="btn" href="#">Close</a>
+        </div>
+      </div>
+      <div><div class="section-title">Description</div><div class="box">Authoritative, structured leader who builds empires with discipline, boundaries, and commanding presence.</div></div>
+      <div><div class="section-title">Fortune</div><div class="box">With <strong>The Emperor</strong>, Mike Vrabel stands unmoved, ruling the game through structure, discipline, and controlled force.
+The expectations measure plays and adjustments, but the card speaks of authority—his fingerprints appear in every critical moment without spectacle.
+When the night ends, order prevails, and his legacy is etched not in noise, but in command.</div></div>
+      <div><div class="section-title">Meaning</div><div class="box">The Emperor represents structure, authority, stability, discipline, leadership, and the establishment of order through clear boundaries and vision.</div></div>
+      <div class="footnotes"><div class="label">Footnotes</div><div class="links">
+        <a href="https://sportsbook.draftkings.com/r/sb/jasnlcas/US-IA-SB/US-IA" target="_blank" rel="noopener">DraftKings (refer)</a>
+        <a href="https://polymarket.com/sports/nfl/props" target="_blank" rel="noopener">Polymarket (NFL props)</a>
+        <a href="https://kalshi.com/markets/kxsb/super-bowl/kxsb-26" target="_blank" rel="noopener">Kalshi (SB odds)</a>
+        <a href="https://www.bovada.lv/welcome/P2JTOAM/join" target="_blank" rel="noopener">Bovada</a>
+      </div></div>
+    </div>
+  </div>
+</section>
+
+<!-- c4 -->
+<section id="c4" class="lightbox">
+  <div class="modal-inner">
+    <div class="modal-media"><img src="https://guardianlawn.online/sportuneteller/assets/cards/hierophant.png" alt="The Hierophant"></div>
+    <div class="modal-meta">
+      <div class="modal-top">
+        <div><h2 class="modal-title">Mike Macdonald</h2><p class="modal-sub">Head Coach, Seahawks • The Hierophant (V)</p></div>
+        <div class="modal-actions">
+          <button class="btn" type="button" data-share-btn>Share</button>
+          <a class="btn" href="#">Close</a>
+        </div>
+      </div>
+      <div><div class="section-title">Description</div><div class="box">Defensive guru and system teacher, passing down traditional knowledge, strategy, and institutional wisdom.</div></div>
+      <div><div class="section-title">Fortune</div><div class="box">With <strong>The Hierophant</strong>, Mike Macdonald coaches by doctrine, trusting preparation, teaching, and belief in the system over impulse.
+The expectations favor adjustments and counters, but the card reveals conviction—his players execute as if following something older than the moment.
+If it breaks Seattle’s way, it won’t feel improvised; it will feel ordained.</div></div>
+      <div><div class="section-title">Meaning</div><div class="box">The Hierophant stands for tradition, spiritual guidance, established wisdom, teaching, conformity to proven systems, and transmission of knowledge.</div></div>
+      <div class="footnotes"><div class="label">Footnotes</div><div class="links">
+        <a href="https://sportsbook.draftkings.com/r/sb/jasnlcas/US-IA-SB/US-IA" target="_blank" rel="noopener">DraftKings (refer)</a>
+        <a href="https://polymarket.com/sports/nfl/props" target="_blank" rel="noopener">Polymarket (NFL props)</a>
+        <a href="https://kalshi.com/markets/kxsb/super-bowl/kxsb-26" target="_blank" rel="noopener">Kalshi (SB odds)</a>
+        <a href="https://www.bovada.lv/welcome/P2JTOAM/join" target="_blank" rel="noopener">Bovada</a>
+      </div></div>
+    </div>
+  </div>
+</section>
+
+<!-- c5 -->
+<section id="c5" class="lightbox">
+  <div class="modal-inner">
+    <div class="modal-media"><img src="https://guardianlawn.online/sportuneteller/assets/cards/star.png" alt="The Star"></div>
+    <div class="modal-meta">
+      <div class="modal-top">
+        <div><h2 class="modal-title">Jaxon Smith-Njigba — #11</h2><p class="modal-sub">WR, Seahawks • The Star (XVII)</p></div>
+        <div class="modal-actions">
+          <button class="btn" type="button" data-share-btn>Share</button>
+          <a class="btn" href="#">Close</a>
+        </div>
+      </div>
+      <div><div class="section-title">Description</div><div class="box">Rising hope and inspiration, shining bright with natural talent, healing the offense, and guiding toward future success.</div></div>
+      <div><div class="section-title">Fortune</div><div class="box">With <strong>The Star</strong>, Jaxon Smith-Njigba moves with calm certainty, a steady light when the game feels most fragile.
+The lines point to 100 yards, 7.5 catches, and a score—but the card hints his impact comes in timing, not volume, arriving precisely when hope is needed.
+Long after the noise fades, he’s remembered as the moment belief quietly returned.</div></div>
+      <div><div class="section-title">Meaning</div><div class="box">The Star signifies hope, inspiration, serenity, healing, renewal of faith, gentle guidance, and a quiet light after darkness.</div></div>
+      <div class="footnotes"><div class="label">Footnotes</div><div class="links">
+        <a href="https://sportsbook.draftkings.com/r/sb/jasnlcas/US-IA-SB/US-IA" target="_blank" rel="noopener">DraftKings (refer)</a>
+        <a href="https://polymarket.com/sports/nfl/props" target="_blank" rel="noopener">Polymarket (NFL props)</a>
+        <a href="https://kalshi.com/markets/kxsb/super-bowl/kxsb-26" target="_blank" rel="noopener">Kalshi (SB odds)</a>
+        <a href="https://www.bovada.lv/welcome/P2JTOAM/join" target="_blank" rel="noopener">Bovada</a>
+      </div></div>
+    </div>
+  </div>
+</section>
+
+<!-- c6 -->
+<section id="c6" class="lightbox">
+  <div class="modal-inner">
+    <div class="modal-media"><img src="https://guardianlawn.online/sportuneteller/assets/cards/justice.png" alt="Justice"></div>
+    <div class="modal-meta">
+      <div class="modal-top">
+        <div><h2 class="modal-title">Christian Gonzalez — #6</h2><p class="modal-sub">CB, Patriots • Justice (XI)</p></div>
+        <div class="modal-actions">
+          <button class="btn" type="button" data-share-btn>Share</button>
+          <a class="btn" href="#">Close</a>
+        </div>
+      </div>
+      <div><div class="section-title">Description</div><div class="box">Balanced, fair, and precise—delivers karmic shutdowns and makes the right calls in coverage with elite judgment.</div></div>
+      <div><div class="section-title">Fortune</div><div class="box">With <strong>Justice</strong>, Christian Gonzalez plays in perfect balance, patient and precise, letting the game come to him.
+The expectations track targets and yards allowed, but the card foretells fairness enforced—routes erased, mistakes punished without emotion.
+When the night is judged, his work stands clean and final, the quiet verdict that shapes the outcome.</div></div>
+      <div><div class="section-title">Meaning</div><div class="box">Justice embodies fairness, truth, cause and effect, balanced decisions, accountability, and the restoration of equilibrium through impartial judgment.</div></div>
+      <div class="footnotes"><div class="label">Footnotes</div><div class="links">
+        <a href="https://sportsbook.draftkings.com/r/sb/jasnlcas/US-IA-SB/US-IA" target="_blank" rel="noopener">DraftKings (refer)</a>
+        <a href="https://polymarket.com/sports/nfl/props" target="_blank" rel="noopener">Polymarket (NFL props)</a>
+        <a href="https://kalshi.com/markets/kxsb/super-bowl/kxsb-26" target="_blank" rel="noopener">Kalshi (SB odds)</a>
+        <a href="https://www.bovada.lv/welcome/P2JTOAM/join" target="_blank" rel="noopener">Bovada</a>
+      </div></div>
+    </div>
+  </div>
+</section>
+
+<!-- c7..c22 fortunes from your provided text -->
+<section id="c7" class="lightbox"><div class="modal-inner"><div class="modal-media"><img src="https://guardianlawn.online/sportuneteller/assets/cards/strength.png" alt="Strength"></div><div class="modal-meta">
+  <div class="modal-top"><div><h2 class="modal-title">Devon Witherspoon — #21</h2><p class="modal-sub">CB, Seahawks • Strength (VIII)</p></div><div class="modal-actions"><button class="btn" type="button" data-share-btn>Share</button><a class="btn" href="#">Close</a></div></div>
+  <div><div class="section-title">Description</div><div class="box">Inner courage and gentle power; tames explosive receivers with calm confidence and raw physical strength.</div></div>
+  <div><div class="section-title">Fortune</div><div class="box">With <strong>Strength</strong>, Devon Witherspoon plays fearless but controlled, power guided by restraint rather than rage.
+The expectations look for hits and coverage, but the card reveals dominance through composure—receivers tested, then discouraged.
+By the final whistle, his strength isn’t measured in violence, but in how completely he bends the matchup to his will.</div></div>
+  <div class="footnotes"><div class="label">Footnotes</div><div class="links">
+    <a href="https://sportsbook.draftkings.com/r/sb/jasnlcas/US-IA-SB/US-IA" target="_blank" rel="noopener">DraftKings (refer)</a>
+    <a href="https://polymarket.com/sports/nfl/props" target="_blank" rel="noopener">Polymarket (NFL props)</a>
+    <a href="https://kalshi.com/markets/kxsb/super-bowl/kxsb-26" target="_blank" rel="noopener">Kalshi (SB odds)</a>
+    <a href="https://www.bovada.lv/welcome/P2JTOAM/join" target="_blank" rel="noopener">Bovada</a>
+  </div></div>
+</div></div></section>
+
+<section id="c8" class="lightbox"><div class="modal-inner"><div class="modal-media"><img src="https://guardianlawn.online/sportuneteller/assets/cards/chariot.png" alt="The Chariot"></div><div class="modal-meta">
+  <div class="modal-top"><div><h2 class="modal-title">Rhamondre Stevenson — #38</h2><p class="modal-sub">RB, Patriots • The Chariot (VII)</p></div><div class="modal-actions"><button class="btn" type="button" data-share-btn>Share</button><a class="btn" href="#">Close</a></div></div>
+  <div><div class="section-title">Description</div><div class="box">Drives forward with willpower, momentum, and control—charging through defenses with determination.</div></div>
+  <div><div class="section-title">Fortune</div><div class="box">With <strong>The Chariot</strong>, Rhamondre Stevenson runs with resolve, momentum carrying him forward no matter the resistance.
+The expectations count yards and touches, but the card speaks of force—drives sustained by will as much as power.
+If New England claims ground when it matters most, it’s because he refused to yield and dragged fate with him.</div></div>
+  <div class="footnotes"><div class="label">Footnotes</div><div class="links">
+    <a href="https://sportsbook.draftkings.com/r/sb/jasnlcas/US-IA-SB/US-IA" target="_blank" rel="noopener">DraftKings (refer)</a>
+    <a href="https://polymarket.com/sports/nfl/props" target="_blank" rel="noopener">Polymarket (NFL props)</a>
+    <a href="https://kalshi.com/markets/kxsb/super-bowl/kxsb-26" target="_blank" rel="noopener">Kalshi (SB odds)</a>
+    <a href="https://www.bovada.lv/welcome/P2JTOAM/join" target="_blank" rel="noopener">Bovada</a>
+  </div></div>
+</div></div></section>
+
+<section id="c9" class="lightbox"><div class="modal-inner"><div class="modal-media"><img src="https://guardianlawn.online/sportuneteller/assets/cards/wheel.png" alt="The Wheel of Fortune"></div><div class="modal-meta">
+  <div class="modal-top"><div><h2 class="modal-title">Kenneth Walker III — #9</h2><p class="modal-sub">RB, Seahawks • The Wheel of Fortune (X)</p></div><div class="modal-actions"><button class="btn" type="button" data-share-btn>Share</button><a class="btn" href="#">Close</a></div></div>
+  <div><div class="section-title">Description</div><div class="box">Dynamic, explosive shifts of fortune; one explosive run can change the game’s momentum entirely.</div></div>
+  <div><div class="section-title">Fortune</div><div class="box">With <strong>The Wheel of Fortune</strong>, Kenneth Walker III runs knowing the game can turn in a single breath, chaos favoring the ready.
+The expectations sketch efficiency, but the card promises swing—one sudden break that flips field position and mood alike.
+When the wheel turns Seattle’s way, it won’t feel earned or stolen, only inevitable.</div></div>
+  <div class="footnotes"><div class="label">Footnotes</div><div class="links">
+    <a href="https://sportsbook.draftkings.com/r/sb/jasnlcas/US-IA-SB/US-IA" target="_blank" rel="noopener">DraftKings (refer)</a>
+    <a href="https://polymarket.com/sports/nfl/props" target="_blank" rel="noopener">Polymarket (NFL props)</a>
+    <a href="https://kalshi.com/markets/kxsb/super-bowl/kxsb-26" target="_blank" rel="noopener">Kalshi (SB odds)</a>
+    <a href="https://www.bovada.lv/welcome/P2JTOAM/join" target="_blank" rel="noopener">Bovada</a>
+  </div></div>
+</div></div></section>
+
+<section id="c10" class="lightbox"><div class="modal-inner"><div class="modal-media"><img src="https://guardianlawn.online/sportuneteller/assets/cards/hermit.png" alt="The Hermit"></div><div class="modal-meta">
+  <div class="modal-top"><div><h2 class="modal-title">Matthew Slater — #18</h2><p class="modal-sub">Special Teams, Patriots • The Hermit (IX)</p></div><div class="modal-actions"><button class="btn" type="button" data-share-btn>Share</button><a class="btn" href="#">Close</a></div></div>
+  <div><div class="section-title">Description</div><div class="box">Veteran sage of special teams, guiding younger players with quiet wisdom, experience, and inner light.</div></div>
+  <div><div class="section-title">Fortune</div><div class="box">With <strong>The Hermit</strong>, Matthew Slater moves without spotlight, guided by discipline, patience, and unseen preparation.
+The expectations barely register his presence, but the card reveals influence—field position tilted, moments stabilized before chaos can speak.
+When the outcome is traced backward, his quiet hand is there, the light that kept New England from losing its way.</div></div>
+  <div class="footnotes"><div class="label">Footnotes</div><div class="links">
+    <a href="https://sportsbook.draftkings.com/r/sb/jasnlcas/US-IA-SB/US-IA" target="_blank" rel="noopener">DraftKings (refer)</a>
+    <a href="https://polymarket.com/sports/nfl/props" target="_blank" rel="noopener">Polymarket (NFL props)</a>
+    <a href="https://kalshi.com/markets/kxsb/super-bowl/kxsb-26" target="_blank" rel="noopener">Kalshi (SB odds)</a>
+    <a href="https://www.bovada.lv/welcome/P2JTOAM/join" target="_blank" rel="noopener">Bovada</a>
+  </div></div>
+</div></div></section>
+
+<section id="c11" class="lightbox"><div class="modal-inner"><div class="modal-media"><img src="https://guardianlawn.online/sportuneteller/assets/cards/highpriestess.png" alt="The High Priestess"></div><div class="modal-meta">
+  <div class="modal-top"><div><h2 class="modal-title">Julian Love — #20</h2><p class="modal-sub">S, Seahawks • The High Priestess (II)</p></div><div class="modal-actions"><button class="btn" type="button" data-share-btn>Share</button><a class="btn" href="#">Close</a></div></div>
+  <div><div class="section-title">Description</div><div class="box">Intuitive safety who reads the hidden plays, trusts instincts, and uncovers mysteries in the secondary.</div></div>
+  <div><div class="section-title">Fortune</div><div class="box">With <strong>The High Priestess</strong>, Julian Love plays from instinct and foresight, reading intentions before they surface.
+The expectations track tackles and coverage, but the card speaks of intuition—routes anticipated, throws discouraged by presence alone.
+When the night turns on a hidden decision, it’s his awareness that reveals the truth too late for the offense to escape.</div></div>
+  <div class="footnotes"><div class="label">Footnotes</div><div class="links">
+    <a href="https://sportsbook.draftkings.com/r/sb/jasnlcas/US-IA-SB/US-IA" target="_blank" rel="noopener">DraftKings (refer)</a>
+    <a href="https://polymarket.com/sports/nfl/props" target="_blank" rel="noopener">Polymarket (NFL props)</a>
+    <a href="https://kalshi.com/markets/kxsb/super-bowl/kxsb-26" target="_blank" rel="noopener">Kalshi (SB odds)</a>
+    <a href="https://www.bovada.lv/welcome/P2JTOAM/join" target="_blank" rel="noopener">Bovada</a>
+  </div></div>
+</div></div></section>
+
+<section id="c12" class="lightbox"><div class="modal-inner"><div class="modal-media"><img src="https://guardianlawn.online/sportuneteller/assets/cards/tower.png" alt="The Tower"></div><div class="modal-meta">
+  <div class="modal-top"><div><h2 class="modal-title">Christian Barmore — #90</h2><p class="modal-sub">DT, Patriots • The Tower (XVI)</p></div><div class="modal-actions"><button class="btn" type="button" data-share-btn>Share</button><a class="btn" href="#">Close</a></div></div>
+  <div><div class="section-title">Description</div><div class="box">Disruptive force that brings sudden upheaval—collapsing pockets and shaking offensive lines.</div></div>
+  <div><div class="section-title">Fortune</div><div class="box">With <strong>The Tower</strong>, Christian Barmore crashes the pocket like an unavoidable reckoning, force shattering structure on contact.
+The expectations look for pressure and disruption, but the card foretells collapse—protection schemes failing all at once.
+When the game swings violently, it’s his surge that brings everything down and demands something new rise in its place.</div></div>
+  <div class="footnotes"><div class="label">Footnotes</div><div class="links">
+    <a href="https://sportsbook.draftkings.com/r/sb/jasnlcas/US-IA-SB/US-IA" target="_blank" rel="noopener">DraftKings (refer)</a>
+    <a href="https://polymarket.com/sports/nfl/props" target="_blank" rel="noopener">Polymarket (NFL props)</a>
+    <a href="https://kalshi.com/markets/kxsb/super-bowl/kxsb-26" target="_blank" rel="noopener">Kalshi (SB odds)</a>
+    <a href="https://www.bovada.lv/welcome/P2JTOAM/join" target="_blank" rel="noopener">Bovada</a>
+  </div></div>
+</div></div></section>
+
+<section id="c13" class="lightbox"><div class="modal-inner"><div class="modal-media"><img src="https://guardianlawn.online/sportuneteller/assets/cards/death.png" alt="Death"></div><div class="modal-meta">
+  <div class="modal-top"><div><h2 class="modal-title">Leonard Williams — #99</h2><p class="modal-sub">DL, Seahawks • Death (XIII)</p></div><div class="modal-actions"><button class="btn" type="button" data-share-btn>Share</button><a class="btn" href="#">Close</a></div></div>
+  <div><div class="section-title">Description</div><div class="box">Transformative veteran who ends drives and brings rebirth through relentless pressure and change.</div></div>
+  <div><div class="section-title">Fortune</div><div class="box">With <strong>Death</strong>, Leonard Williams ends what was working, snapping drives and closing chapters without mercy.
+The expectations account for pressure and stops, but the card promises transformation—one decisive moment where momentum is cut clean.
+After he strikes, the game doesn’t continue as before; it becomes something else entirely.</div></div>
+  <div class="footnotes"><div class="label">Footnotes</div><div class="links">
+    <a href="https://sportsbook.draftkings.com/r/sb/jasnlcas/US-IA-SB/US-IA" target="_blank" rel="noopener">DraftKings (refer)</a>
+    <a href="https://polymarket.com/sports/nfl/props" target="_blank" rel="noopener">Polymarket (NFL props)</a>
+    <a href="https://kalshi.com/markets/kxsb/super-bowl/kxsb-26" target="_blank" rel="noopener">Kalshi (SB odds)</a>
+    <a href="https://www.bovada.lv/welcome/P2JTOAM/join" target="_blank" rel="noopener">Bovada</a>
+  </div></div>
+</div></div></section>
+
+<section id="c14" class="lightbox"><div class="modal-inner"><div class="modal-media"><img src="https://guardianlawn.online/sportuneteller/assets/cards/hangedman.png" alt="The Hanged Man"></div><div class="modal-meta">
+  <div class="modal-top"><div><h2 class="modal-title">Anfernee Jennings — #58</h2><p class="modal-sub">EDGE, Patriots • The Hanged Man (XII)</p></div><div class="modal-actions"><button class="btn" type="button" data-share-btn>Share</button><a class="btn" href="#">Close</a></div></div>
+  <div><div class="section-title">Description</div><div class="box">Sacrificial edge rusher who sees things differently, hangs in for the team, and gains new perspective through persistence.</div></div>
+  <div><div class="section-title">Fortune</div><div class="box">With <strong>The Hanged Man</strong>, Anfernee Jennings plays with patience and sacrifice, waiting as the game inverts around him.
+The expectations chase sacks, but the card reveals value in delay—containment, forced hesitation, and plays that die by doing nothing flashy.
+When the moment finally breaks, it’s because he understood when to hang back and let fate move first.</div></div>
+  <div class="footnotes"><div class="label">Footnotes</div><div class="links">
+    <a href="https://sportsbook.draftkings.com/r/sb/jasnlcas/US-IA-SB/US-IA" target="_blank" rel="noopener">DraftKings (refer)</a>
+    <a href="https://polymarket.com/sports/nfl/props" target="_blank" rel="noopener">Polymarket (NFL props)</a>
+    <a href="https://kalshi.com/markets/kxsb/super-bowl/kxsb-26" target="_blank" rel="noopener">Kalshi (SB odds)</a>
+    <a href="https://www.bovada.lv/welcome/P2JTOAM/join" target="_blank" rel="noopener">Bovada</a>
+  </div></div>
+</div></div></section>
+
+<section id="c15" class="lightbox"><div class="modal-inner"><div class="modal-media"><img src="https://guardianlawn.online/sportuneteller/assets/cards/devil.png" alt="The Devil"></div><div class="modal-meta">
+  <div class="modal-top"><div><h2 class="modal-title">Boye Mafe — #53</h2><p class="modal-sub">EDGE, Seahawks • The Devil (XV)</p></div><div class="modal-actions"><button class="btn" type="button" data-share-btn>Share</button><a class="btn" href="#">Close</a></div></div>
+  <div><div class="section-title">Description</div><div class="box">Raw power and temptation to offenses—chains QBs with speed and strength, material dominance.</div></div>
+  <div><div class="section-title">Fortune</div><div class="box">With <strong>The Devil</strong>, Boye Mafe plays as pure temptation, speed and power daring the offense into bad decisions.
+The expectations measure pressure, but the card reveals bondage—linemen locked in place as the pocket tightens around them.
+If the game turns dark in a single series, it’s because he dragged it there and refused to let go.</div></div>
+  <div class="footnotes"><div class="label">Footnotes</div><div class="links">
+    <a href="https://sportsbook.draftkings.com/r/sb/jasnlcas/US-IA-SB/US-IA" target="_blank" rel="noopener">DraftKings (refer)</a>
+    <a href="https://polymarket.com/sports/nfl/props" target="_blank" rel="noopener">Polymarket (NFL props)</a>
+    <a href="https://kalshi.com/markets/kxsb/super-bowl/kxsb-26" target="_blank" rel="noopener">Kalshi (SB odds)</a>
+    <a href="https://www.bovada.lv/welcome/P2JTOAM/join" target="_blank" rel="noopener">Bovada</a>
+  </div></div>
+</div></div></section>
+
+<section id="c16" class="lightbox"><div class="modal-inner"><div class="modal-media"><img src="https://guardianlawn.online/sportuneteller/assets/cards/lovers.png" alt="The Lovers"></div><div class="modal-meta">
+  <div class="modal-top"><div><h2 class="modal-title">Kendrick Bourne — #84</h2><p class="modal-sub">WR, Patriots • The Lovers (VI)</p></div><div class="modal-actions"><button class="btn" type="button" data-share-btn>Share</button><a class="btn" href="#">Close</a></div></div>
+  <div><div class="section-title">Description</div><div class="box">Reliable connection and harmony in the passing game, making choices that unite QB and receiver.</div></div>
+  <div><div class="section-title">Fortune</div><div class="box">With <strong>The Lovers</strong>, Kendrick Bourne plays in rhythm and trust, connection guiding every break and release.
+The expectations focus on targets and yards, but the card speaks of choice—one read, one route, where quarterback and receiver move as one.
+When the moment demands commitment, that bond becomes the difference between hesitation and destiny.</div></div>
+  <div class="footnotes"><div class="label">Footnotes</div><div class="links">
+    <a href="https://sportsbook.draftkings.com/r/sb/jasnlcas/US-IA-SB/US-IA" target="_blank" rel="noopener">DraftKings (refer)</a>
+    <a href="https://polymarket.com/sports/nfl/props" target="_blank" rel="noopener">Polymarket (NFL props)</a>
+    <a href="https://kalshi.com/markets/kxsb/super-bowl/kxsb-26" target="_blank" rel="noopener">Kalshi (SB odds)</a>
+    <a href="https://www.bovada.lv/welcome/P2JTOAM/join" target="_blank" rel="noopener">Bovada</a>
+  </div></div>
+</div></div></section>
+
+<section id="c17" class="lightbox"><div class="modal-inner"><div class="modal-media"><img src="https://guardianlawn.online/sportuneteller/assets/cards/empress.png" alt="The Empress"></div><div class="modal-meta">
+  <div class="modal-top"><div><h2 class="modal-title">Mike Gesicki — #88</h2><p class="modal-sub">TE, Patriots • The Empress (III)</p></div><div class="modal-actions"><button class="btn" type="button" data-share-btn>Share</button><a class="btn" href="#">Close</a></div></div>
+  <div><div class="section-title">Description</div><div class="box">Nurturing, creative pass-catcher who provides abundance, comfort, and fertile targets in the red zone.</div></div>
+  <div><div class="section-title">Fortune</div><div class="box">With <strong>The Empress</strong>, Mike Gesicki plays with grace and presence, creating space where none seems available.
+The expectations note receptions and red-zone chances, but the card promises abundance—soft hands and body control nurturing the offense at its most delicate moments.
+When New England finds comfort under pressure, it’s his calm production that sustains the drive and shapes the outcome.</div></div>
+  <div class="footnotes"><div class="label">Footnotes</div><div class="links">
+    <a href="https://sportsbook.draftkings.com/r/sb/jasnlcas/US-IA-SB/US-IA" target="_blank" rel="noopener">DraftKings (refer)</a>
+    <a href="https://polymarket.com/sports/nfl/props" target="_blank" rel="noopener">Polymarket (NFL props)</a>
+    <a href="https://kalshi.com/markets/kxsb/super-bowl/kxsb-26" target="_blank" rel="noopener">Kalshi (SB odds)</a>
+    <a href="https://www.bovada.lv/welcome/P2JTOAM/join" target="_blank" rel="noopener">Bovada</a>
+  </div></div>
+</div></div></section>
+
+<section id="c18" class="lightbox"><div class="modal-inner"><div class="modal-media"><img src="https://guardianlawn.online/sportuneteller/assets/cards/moon.png" alt="The Moon"></div><div class="modal-meta">
+  <div class="modal-top"><div><h2 class="modal-title">Noah Fant — #87</h2><p class="modal-sub">TE, Seahawks • The Moon (XVIII)</p></div><div class="modal-actions"><button class="btn" type="button" data-share-btn>Share</button><a class="btn" href="#">Close</a></div></div>
+  <div><div class="section-title">Description</div><div class="box">Elusive, athletic mystery—deceptive speed and illusion in routes, navigating uncertainty with intuition.</div></div>
+  <div><div class="section-title">Fortune</div><div class="box">With <strong>The Moon</strong>, Noah Fant moves through uncertainty, misdirection and shadows shaping his routes.
+The expectations look for steady production, but the card reveals illusion—defenders hesitating just long enough for him to slip free.
+When the night feels strange and unpredictable, it’s his presence that thrives in the confusion and turns doubt into opportunity.</div></div>
+  <div class="footnotes"><div class="label">Footnotes</div><div class="links">
+    <a href="https://sportsbook.draftkings.com/r/sb/jasnlcas/US-IA-SB/US-IA" target="_blank" rel="noopener">DraftKings (refer)</a>
+    <a href="https://polymarket.com/sports/nfl/props" target="_blank" rel="noopener">Polymarket (NFL props)</a>
+    <a href="https://kalshi.com/markets/kxsb/super-bowl/kxsb-26" target="_blank" rel="noopener">Kalshi (SB odds)</a>
+    <a href="https://www.bovada.lv/welcome/P2JTOAM/join" target="_blank" rel="noopener">Bovada</a>
+  </div></div>
+</div></div></section>
+
+<section id="c19" class="lightbox"><div class="modal-inner"><div class="modal-media"><img src="https://guardianlawn.online/sportuneteller/assets/cards/temperance.png" alt="Temperance"></div><div class="modal-meta">
+  <div class="modal-top"><div><h2 class="modal-title">Ja’Whaun Bentley — #8</h2><p class="modal-sub">LB, Patriots • Temperance (XIV)</p></div><div class="modal-actions"><button class="btn" type="button" data-share-btn>Share</button><a class="btn" href="#">Close</a></div></div>
+  <div><div class="section-title">Description</div><div class="box">Balanced leader who mixes aggression and patience, finding harmony in the chaos of defense.</div></div>
+  <div><div class="section-title">Fortune</div><div class="box">With <strong>Temperance</strong>, Ja’Whaun Bentley plays in balance, blending discipline and restraint to steady the defense.
+The expectations track tackles, but the card speaks of moderation—gaps filled, chaos slowed, extremes pulled back into control.
+When the game avoids tipping into disorder, it’s his measured presence that keeps fate aligned.</div></div>
+  <div class="footnotes"><div class="label">Footnotes</div><div class="links">
+    <a href="https://sportsbook.draftkings.com/r/sb/jasnlcas/US-IA-SB/US-IA" target="_blank" rel="noopener">DraftKings (refer)</a>
+    <a href="https://polymarket.com/sports/nfl/props" target="_blank" rel="noopener">Polymarket (NFL props)</a>
+    <a href="https://kalshi.com/markets/kxsb/super-bowl/kxsb-26" target="_blank" rel="noopener">Kalshi (SB odds)</a>
+    <a href="https://www.bovada.lv/welcome/P2JTOAM/join" target="_blank" rel="noopener">Bovada</a>
+  </div></div>
+</div></div></section>
+
+<section id="c20" class="lightbox"><div class="modal-inner"><div class="modal-media"><img src="https://guardianlawn.online/sportuneteller/assets/cards/sun.png" alt="The Sun"></div><div class="modal-meta">
+  <div class="modal-top"><div><h2 class="modal-title">Jordyn Brooks — #56</h2><p class="modal-sub">LB, Seahawks • The Sun (XIX)</p></div><div class="modal-actions"><button class="btn" type="button" data-share-btn>Share</button><a class="btn" href="#">Close</a></div></div>
+  <div><div class="section-title">Description</div><div class="box">Bright, energetic force of positivity and vitality—radiates joy in tackles and lights up the field.</div></div>
+  <div><div class="section-title">Fortune</div><div class="box">With <strong>The Sun</strong>, Jordyn Brooks plays with clarity and confidence, energy radiating through the defense.
+The expectations count tackles, but the card promises illumination—plays revealed early, momentum lifted by his presence.
+When Seattle surges, it feels obvious in hindsight, as if the light was always going to break through.</div></div>
+  <div class="footnotes"><div class="label">Footnotes</div><div class="links">
+    <a href="https://sportsbook.draftkings.com/r/sb/jasnlcas/US-IA-SB/US-IA" target="_blank" rel="noopener">DraftKings (refer)</a>
+    <a href="https://polymarket.com/sports/nfl/props" target="_blank" rel="noopener">Polymarket (NFL props)</a>
+    <a href="https://kalshi.com/markets/kxsb/super-bowl/kxsb-26" target="_blank" rel="noopener">Kalshi (SB odds)</a>
+    <a href="https://www.bovada.lv/welcome/P2JTOAM/join" target="_blank" rel="noopener">Bovada</a>
+  </div></div>
+</div></div></section>
+
+<section id="c21" class="lightbox"><div class="modal-inner"><div class="modal-media"><img src="https://guardianlawn.online/sportuneteller/assets/cards/world.png" alt="The World"></div><div class="modal-meta">
+  <div class="modal-top"><div><h2 class="modal-title">Super Bowl LX</h2><p class="modal-sub">The World (XXI)</p></div><div class="modal-actions"><button class="btn" type="button" data-share-btn>Share</button><a class="btn" href="#">Close</a></div></div>
+  <div><div class="section-title">Description</div><div class="box">Completion, achievement, and unity—the ultimate triumph of the game, closing the cycle.</div></div>
+  <div><div class="section-title">Fortune</div><div class="box">With <strong>The World</strong>, the Super Bowl arrives as completion—every journey, gamble, and lesson converging into a single, final circle.
+The expectations frame a matchup and a winner, but the card speaks of wholeness, where moments across the field interlock into something larger than a score.
+When it ends, it won’t feel unfinished or debated; it will feel complete, the season closing exactly as it was meant to.</div></div>
+  <div class="footnotes"><div class="label">Footnotes</div><div class="links">
+    <a href="https://sportsbook.draftkings.com/r/sb/jasnlcas/US-IA-SB/US-IA" target="_blank" rel="noopener">DraftKings (refer)</a>
+    <a href="https://polymarket.com/sports/nfl/props" target="_blank" rel="noopener">Polymarket (NFL props)</a>
+    <a href="https://kalshi.com/markets/kxsb/super-bowl/kxsb-26" target="_blank" rel="noopener">Kalshi (SB odds)</a>
+    <a href="https://www.bovada.lv/welcome/P2JTOAM/join" target="_blank" rel="noopener">Bovada</a>
+  </div></div>
+</div></div></section>
+
+<section id="c22" class="lightbox"><div class="modal-inner"><div class="modal-media"><img src="https://guardianlawn.online/sportuneteller/assets/cards/judgment.png" alt="Judgment"></div><div class="modal-meta">
+  <div class="modal-top"><div><h2 class="modal-title">Officials</h2><p class="modal-sub">Judgment (XX)</p></div><div class="modal-actions"><button class="btn" type="button" data-share-btn>Share</button><a class="btn" href="#">Close</a></div></div>
+  <div><div class="section-title">Description</div><div class="box">Awakening and reckoning—resurrection of legacies, final call, and transformative judgment day on the biggest stage.</div></div>
+  <div><div class="section-title">Fortune</div><div class="box">With <strong>Judgment</strong>, the officials stand as the final arbiters, their whistles carrying consequence beyond the moment.
+The expectations ask for neutrality, but the card signals reckoning—calls that awaken momentum and force decisions into the open.
+When the night is reviewed, their moments won’t be forgotten; they will define how this game is ultimately remembered.</div></div>
+  <div class="footnotes"><div class="label">Footnotes</div><div class="links">
+    <a href="https://sportsbook.draftkings.com/r/sb/jasnlcas/US-IA-SB/US-IA" target="_blank" rel="noopener">DraftKings (refer)</a>
+    <a href="https://polymarket.com/sports/nfl/props" target="_blank" rel="noopener">Polymarket (NFL props)</a>
+    <a href="https://kalshi.com/markets/kxsb/super-bowl/kxsb-26" target="_blank" rel="noopener">Kalshi (SB odds)</a>
+    <a href="https://www.bovada.lv/welcome/P2JTOAM/join" target="_blank" rel="noopener">Bovada</a>
+  </div></div>
+</div></div></section>
+
+<script>
+(function(){
+  function currentUrl(){
+    return window.location.origin + window.location.pathname + window.location.hash;
+  }
+
+  async function share(){
+    const url = currentUrl();
+    const title = "SportuneTeller";
+    const text = "SportuneTeller card:";
+
+    try{
+      if(navigator.share){
+        await navigator.share({title, text, url});
+        return;
+      }
+    }catch(e){ return; }
+
+    try{
+      await navigator.clipboard.writeText(url);
+      alert("Link copied:\\n" + url);
+    }catch(e){
+      prompt("Copy this link:", url);
+    }
+  }
+
+  document.addEventListener("click", function(e){
+    const btn = e.target.closest("[data-share-btn]");
+    if(!btn) return;
+    e.preventDefault();
+    share();
+  });
+
+  // Escape closes any modal by clearing the hash
+  document.addEventListener("keydown", function(e){
+    if(e.key === "Escape" && window.location.hash){
+      window.location.hash = "";
+    }
+  });
+})();
+</script>
+
 </body>
 </html>
