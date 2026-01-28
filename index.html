@@ -2,14 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>SportuneTeller — Tarot of the Gridiron</title>
-  <meta name="description" content="A tarot-inspired gallery of football legends and omens." />
-  <link rel="stylesheet" href="styles.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SportuneTeller</title>
+  <meta name="description" content="SportuneTeller — Tarot of the Gridiron" />
+  <link rel="stylesheet" href="style.css" />
 </head>
-
 <body>
-  <header class="header">
+  <header class="top">
     <div class="brand">
       <div class="sigil">♜</div>
       <div>
@@ -17,66 +16,33 @@
         <p>Tarot of the Gridiron</p>
       </div>
     </div>
-
-    <div class="controls">
-      <input id="search" type="search" placeholder="Search player, card, team…" autocomplete="off" />
-      <select id="teamFilter">
-        <option value="all">All teams</option>
-        <option value="patriots">Patriots</option>
-        <option value="seahawks">Seahawks</option>
-      </select>
-      <select id="typeFilter">
-        <option value="all">All cards</option>
-        <option value="major">Major Arcana</option>
-      </select>
-    </div>
   </header>
 
-  <main class="main">
-    <section class="intro">
-      <div class="intro-card">
-        <h2>The Deck</h2>
-        <p>
-          A sepia-etched, Rider–Waite inspired set of football omens.
-          Click any card to reveal it in full.
-        </p>
-      </div>
-    </section>
-
-    <section id="grid" class="grid" aria-label="Card gallery"></section>
+  <main class="wrap">
+    <section id="grid" class="grid" aria-label="Tarot gallery"></section>
   </main>
 
-  <!-- Modal Viewer -->
-  <div id="modal" class="modal" aria-hidden="true">
-    <div class="modal-backdrop" id="modalBackdrop"></div>
-    <div class="modal-panel" role="dialog" aria-modal="true" aria-label="Card viewer">
-      <button class="modal-close" id="modalClose" aria-label="Close">✕</button>
+  <!-- Mobile-first viewer -->
+  <div id="viewer" class="viewer" aria-hidden="true">
+    <div id="backdrop" class="backdrop"></div>
 
-      <div class="modal-body">
-        <div class="modal-frame">
-          <img id="modalImg" alt="" />
-        </div>
-
-        <div class="modal-meta">
-          <h3 id="modalTitle"></h3>
-          <p id="modalSubtitle" class="muted"></p>
-          <div class="meta-row">
-            <span class="pill" id="modalTeam"></span>
-            <span class="pill" id="modalArcana"></span>
-          </div>
-          <div class="meta-row">
-            <button id="copyLink" class="btn">Copy link</button>
-            <a id="openImage" class="btn btn-ghost" href="#" target="_blank" rel="noreferrer">Open image</a>
-          </div>
-        </div>
+    <div class="sheet" role="dialog" aria-modal="true" aria-label="Card viewer">
+      <div class="sheetTop">
+        <div class="sheetTitle" id="cardName">Card</div>
+        <button id="closeBtn" class="iconBtn" aria-label="Close">✕</button>
       </div>
 
+      <div class="frame">
+        <img id="fullImg" alt="" />
+      </div>
+
+      <div class="sheetBottom">
+        <button id="prevBtn" class="btn">Prev</button>
+        <a id="openBtn" class="btn ghost" href="#" target="_blank" rel="noreferrer">Open</a>
+        <button id="nextBtn" class="btn">Next</button>
+      </div>
     </div>
   </div>
-
-  <footer class="footer">
-    <p>© <span id="year"></span> SportuneTeller.com</p>
-  </footer>
 
   <script src="app.js"></script>
 </body>
